@@ -45,7 +45,7 @@ export const ACHIEVEMENTS = [
 ];
 
 export const AppProvider = ({ children }) => {
-  const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
+  const API_BASE = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? '' : 'https://ha-evolution.onrender.com');
   const [sportSchedule, setSportSchedule] = useState(DEFAULT_SPORT_SCHEDULE);
   const [entertainmentSchedule, setEntertainmentSchedule] = useState(DEFAULT_ENTERTAINMENT_SCHEDULE);
   const [watchlist, setWatchlist] = useState(DEFAULT_WATCHLIST);

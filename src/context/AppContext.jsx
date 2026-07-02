@@ -60,42 +60,37 @@ export const AppProvider = ({ children }) => {
   // Fetch all data from MongoDB on startup
   useEffect(() => {
     const fetchAllData = async () => {
-      try {
-        const [sportRes, entRes, watchRes, learnRes, statsRes, habitsRes] = await Promise.all([
-          fetch(API_BASE + '/api/sport'),
-          fetch(API_BASE + '/api/entertainment'),
-          fetch(API_BASE + '/api/watchlist'),
-          fetch(API_BASE + '/api/learning'),
-          fetch(API_BASE + '/api/stats'),
-          fetch(API_BASE + '/api/habits')
-        ]);
+      const fetchResource = async (url, setter, label) => {
+        try {
+          const res = await fetch(url);
+          if (res.ok) {
+            const data = await res.json();
+            if (data) {
+              if (label === 'stats') {
+                setter(data);
+              } else if (Object.keys(data).length > 0) {
+                setter(data);
+              }
+            }
+          } else {
+            console.warn(`Backend returned non-ok status for ${label}:`, res.status);
+          }
+        } catch (err) {
+          console.warn(`Failed to retrieve ${label} from backend:`, err);
+        }
+      };
 
-        if (sportRes.ok) {
-          const data = await sportRes.json();
-          if (Object.keys(data).length > 0) setSportSchedule(data);
-        }
-        if (entRes.ok) {
-          const data = await entRes.json();
-          setEntertainmentSchedule(data);
-        }
-        if (watchRes.ok) {
-          const data = await watchRes.json();
-          setWatchlist(data);
-        }
-        if (learnRes.ok) {
-          const data = await learnRes.json();
-          setLearningSchedule(data);
-        }
-        if (statsRes.ok) {
-          const data = await statsRes.json();
-          if (data) setUserStats(data);
-        }
-        if (habitsRes.ok) {
-          const data = await habitsRes.json();
-          setHabitsSchedule(data);
-        }
+      try {
+        await Promise.all([
+          fetchResource(API_BASE + '/api/sport', setSportSchedule, 'sport'),
+          fetchResource(API_BASE + '/api/entertainment', setEntertainmentSchedule, 'entertainment'),
+          fetchResource(API_BASE + '/api/watchlist', setWatchlist, 'watchlist'),
+          fetchResource(API_BASE + '/api/learning', setLearningSchedule, 'learning'),
+          fetchResource(API_BASE + '/api/stats', setUserStats, 'stats'),
+          fetchResource(API_BASE + '/api/habits', setHabitsSchedule, 'habits')
+        ]);
       } catch (err) {
-        console.warn("Failed to retrieve data from backend, falling back to local memory:", err);
+        console.error("Global startup fetching error:", err);
       } finally {
         setLoading(false);
       }

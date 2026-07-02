@@ -45,6 +45,7 @@ export const ACHIEVEMENTS = [
 ];
 
 export const AppProvider = ({ children }) => {
+  const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
   const [sportSchedule, setSportSchedule] = useState(DEFAULT_SPORT_SCHEDULE);
   const [entertainmentSchedule, setEntertainmentSchedule] = useState(DEFAULT_ENTERTAINMENT_SCHEDULE);
   const [watchlist, setWatchlist] = useState(DEFAULT_WATCHLIST);
@@ -61,12 +62,12 @@ export const AppProvider = ({ children }) => {
     const fetchAllData = async () => {
       try {
         const [sportRes, entRes, watchRes, learnRes, statsRes, habitsRes] = await Promise.all([
-          fetch('/api/sport'),
-          fetch('/api/entertainment'),
-          fetch('/api/watchlist'),
-          fetch('/api/learning'),
-          fetch('/api/stats'),
-          fetch('/api/habits')
+          fetch(API_BASE + '/api/sport'),
+          fetch(API_BASE + '/api/entertainment'),
+          fetch(API_BASE + '/api/watchlist'),
+          fetch(API_BASE + '/api/learning'),
+          fetch(API_BASE + '/api/stats'),
+          fetch(API_BASE + '/api/habits')
         ]);
 
         if (sportRes.ok) {
@@ -109,7 +110,7 @@ export const AppProvider = ({ children }) => {
 
     const syncStats = async () => {
       try {
-        await fetch('/api/stats', {
+        await fetch(API_BASE + '/api/stats', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(userStats)
@@ -188,7 +189,7 @@ export const AppProvider = ({ children }) => {
     }));
 
     try {
-      await fetch(`/api/sport/${day}`, {
+      await fetch(`${API_BASE}/api/sport/${day}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedWorkout)
@@ -219,7 +220,7 @@ export const AppProvider = ({ children }) => {
     }
 
     try {
-      await fetch(`/api/sport/${day}`, {
+      await fetch(`${API_BASE}/api/sport/${day}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedWorkout)
@@ -237,7 +238,7 @@ export const AppProvider = ({ children }) => {
     }));
 
     try {
-      await fetch(`/api/entertainment/${day}`, {
+      await fetch(`${API_BASE}/api/entertainment/${day}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data === null ? { title: null } : data)
@@ -276,7 +277,7 @@ export const AppProvider = ({ children }) => {
     }
 
     try {
-      await fetch(`/api/entertainment/${day}`, {
+      await fetch(`${API_BASE}/api/entertainment/${day}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedItem)
@@ -291,7 +292,7 @@ export const AppProvider = ({ children }) => {
     setWatchlist(prev => [...prev, newItem]);
 
     try {
-      await fetch('/api/watchlist', {
+      await fetch(API_BASE + '/api/watchlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newItem)
@@ -305,7 +306,7 @@ export const AppProvider = ({ children }) => {
     setWatchlist(prev => prev.filter(w => w.id !== id));
 
     try {
-      await fetch(`/api/watchlist/${id}`, {
+      await fetch(`${API_BASE}/api/watchlist/${id}`, {
         method: 'DELETE'
       });
     } catch (err) {
@@ -321,7 +322,7 @@ export const AppProvider = ({ children }) => {
     }));
 
     try {
-      await fetch(`/api/learning/${day}`, {
+      await fetch(`${API_BASE}/api/learning/${day}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data === null ? { subject: null } : data)
@@ -347,7 +348,7 @@ export const AppProvider = ({ children }) => {
     }
 
     try {
-      await fetch(`/api/learning/${day}`, {
+      await fetch(`${API_BASE}/api/learning/${day}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedItem)
@@ -379,7 +380,7 @@ export const AppProvider = ({ children }) => {
     }
 
     try {
-      await fetch(`/api/learning/${day}`, {
+      await fetch(`${API_BASE}/api/learning/${day}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedItem)
@@ -398,7 +399,7 @@ export const AppProvider = ({ children }) => {
     }));
 
     try {
-      await fetch(`/api/habits/${day}`, {
+      await fetch(`${API_BASE}/api/habits/${day}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedHabit)
@@ -425,7 +426,7 @@ export const AppProvider = ({ children }) => {
     }
 
     try {
-      await fetch(`/api/habits/${day}`, {
+      await fetch(`${API_BASE}/api/habits/${day}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedHabit)
@@ -449,22 +450,22 @@ export const AppProvider = ({ children }) => {
     // Trigger reset sequences on the backend
     try {
       await Promise.all([
-        ...DAYS.map(day => fetch(`/api/sport/${day}`, {
+        ...DAYS.map(day => fetch(`${API_BASE}/api/sport/${day}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ...DEFAULT_SPORT_SCHEDULE[day], completed: false })
         })),
-        ...DAYS.map(day => fetch(`/api/entertainment/${day}`, {
+        ...DAYS.map(day => fetch(`${API_BASE}/api/entertainment/${day}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ title: null })
         })),
-        ...DAYS.map(day => fetch(`/api/learning/${day}`, {
+        ...DAYS.map(day => fetch(`${API_BASE}/api/learning/${day}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ subject: null })
         })),
-        ...DAYS.map(day => fetch(`/api/habits/${day}`, {
+        ...DAYS.map(day => fetch(`${API_BASE}/api/habits/${day}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ surah: null })

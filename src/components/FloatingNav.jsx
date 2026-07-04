@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { NavLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiGrid, FiActivity, FiPlayCircle, FiBookOpen, FiCalendar, FiTrendingUp, FiCompass } from 'react-icons/fi';
+import { FiGrid, FiActivity, FiPlayCircle, FiBookOpen, FiCalendar, FiTrendingUp, FiCompass, FiClock } from 'react-icons/fi';
 import { AppContext } from '../context/AppContext';
 
 export default function FloatingNav() {
@@ -13,6 +13,7 @@ export default function FloatingNav() {
     { to: '/entertainment', icon: <FiPlayCircle className="w-5 h-5" />, label: 'Play' },
     { to: '/learning', icon: <FiBookOpen className="w-5 h-5" />, label: 'Learn' },
     { to: '/habits', icon: <FiCompass className="w-5 h-5" />, label: 'Habits' },
+    { to: '/history', icon: <FiClock className="w-5 h-5" />, label: 'History' },
     { to: '/calendar', icon: <FiCalendar className="w-5 h-5" />, label: 'Calendar' },
     { to: '/analytics', icon: <FiTrendingUp className="w-5 h-5" />, label: 'Stats' }
   ];

@@ -1,0 +1,3 @@
+@echo off
+echo Opening HA Life Evolution Dashboard...
+start "" "https://ha-evolution.vercel.app/"

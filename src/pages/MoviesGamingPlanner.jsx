@@ -51,7 +51,7 @@ export default function MoviesGamingPlanner() {
     );
   }
 
-  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const days = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
   const handleSaveToSchedule = (dayToSave) => {
     if (!title.trim()) return;

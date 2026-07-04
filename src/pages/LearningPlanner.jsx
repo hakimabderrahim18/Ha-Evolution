@@ -41,7 +41,7 @@ export default function LearningPlanner() {
     );
   }
 
-  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const days = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
   // Update form values based on activeDay select
   useEffect(() => {

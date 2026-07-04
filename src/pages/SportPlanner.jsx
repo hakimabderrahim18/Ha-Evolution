@@ -32,7 +32,7 @@ export default function SportPlanner() {
   const [workoutInput, setWorkoutInput] = useState('');
   const [selectedMuscle, setSelectedMuscle] = useState('Chest');
 
-  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const days = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
   const handleDragStart = (e, muscleName) => {
     e.dataTransfer.setData('muscle', muscleName);

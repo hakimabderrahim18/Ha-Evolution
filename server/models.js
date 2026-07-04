@@ -50,9 +50,39 @@ const QuranHabitSchema = new mongoose.Schema({
   completed: { type: Boolean, default: false }
 });
 
+const DailyHistorySchema = new mongoose.Schema({
+  date: { type: String, required: true, unique: true }, // YYYY-MM-DD
+  dayName: { type: String, required: true },
+  sport: {
+    muscle: { type: String, default: null },
+    name: { type: String, default: null },
+    completed: { type: Boolean, default: false }
+  },
+  entertainment: {
+    title: { type: String, default: null },
+    type: { type: String, default: null },
+    genre: { type: String, default: null },
+    completed: { type: Boolean, default: false }
+  },
+  learning: {
+    subject: { type: String, default: null },
+    objective: { type: String, default: null },
+    hours: { type: Number, default: 0 },
+    minutes: { type: Number, default: 0 },
+    completed: { type: Boolean, default: false }
+  },
+  habits: {
+    surah: { type: String, default: null },
+    onePlusActivity: { type: String, default: null },
+    completed: { type: Boolean, default: false }
+  },
+  xpGained: { type: Number, default: 0 }
+});
+
 export const SportWorkout = mongoose.model('SportWorkout', SportWorkoutSchema);
 export const EntertainmentDay = mongoose.model('EntertainmentDay', EntertainmentDaySchema);
 export const WatchlistItem = mongoose.model('WatchlistItem', WatchlistItemSchema);
 export const LearningDay = mongoose.model('LearningDay', LearningDaySchema);
 export const UserStats = mongoose.model('UserStats', UserStatsSchema);
 export const QuranHabit = mongoose.model('QuranHabit', QuranHabitSchema);
+export const DailyHistory = mongoose.model('DailyHistory', DailyHistorySchema);

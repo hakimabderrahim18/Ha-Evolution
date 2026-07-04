@@ -9,7 +9,8 @@ import {
   WatchlistItem,
   LearningDay,
   UserStats,
-  QuranHabit
+  QuranHabit,
+  DailyHistory
 } from './models.js';
 
 dotenv.config();
@@ -32,27 +33,27 @@ mongoose.connect(MONGO_URI)
     console.error('MongoDB database connection error:', err);
   });
 
-// Default Week Days list
-const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+// Default Week Days list starting on Saturday
+const DAYS = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
 const DEFAULT_SPORT = {
+  Saturday: { muscle: 'Core', name: 'Planks & Hanging Leg Raises' },
+  Sunday: { muscle: 'Rest', name: 'Active Recovery & Stretching' },
   Monday: { muscle: 'Chest', name: 'Barbell Bench Press & Flyes' },
   Tuesday: { muscle: 'Back', name: 'Deadlifts & Lat Pulldowns' },
   Wednesday: { muscle: 'Shoulders', name: 'Overhead Press & Lateral Raises' },
   Thursday: { muscle: 'Arms', name: 'Bicep Curls & Tricep Pushdowns' },
-  Friday: { muscle: 'Legs', name: 'Squats & Bulgarian Split Squats' },
-  Saturday: { muscle: 'Core', name: 'Planks & Hanging Leg Raises' },
-  Sunday: { muscle: 'Rest', name: 'Active Recovery & Stretching' }
+  Friday: { muscle: 'Legs', name: 'Squats & Bulgarian Split Squats' }
 };
 
 const DEFAULT_HABIT = {
+  Saturday: { surah: 'Surah Al-Mulk', onePlusActivity: 'Feed a bird/stray animal' },
+  Sunday: { surah: 'Surah Sajdah', onePlusActivity: 'Call a relative / check on family' },
   Monday: { surah: 'Surah Al-Fatihah & Al-Mulk', onePlusActivity: 'Dhikr 100x' },
   Tuesday: { surah: 'Surah Yaseen', onePlusActivity: 'Give Charity' },
   Wednesday: { surah: 'Surah Al-Waqiah', onePlusActivity: 'Help someone in need' },
   Thursday: { surah: 'Surah Ar-Rahman', onePlusActivity: 'Read 1 Islamic Article' },
-  Friday: { surah: 'Surah Al-Kahf', onePlusActivity: 'Send blessings (Salawat) 100x' },
-  Saturday: { surah: 'Surah Al-Mulk', onePlusActivity: 'Feed a bird/stray animal' },
-  Sunday: { surah: 'Surah Sajdah', onePlusActivity: 'Call a relative / check on family' }
+  Friday: { surah: 'Surah Al-Kahf', onePlusActivity: 'Send blessings (Salawat) 100x' }
 };
 
 // Seed database with default schedules if collection is empty
@@ -337,6 +338,39 @@ app.post('/api/habits/:day', async (req, res) => {
       { new: true, upsert: true }
     );
     res.json(habit);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 7. History Routes
+app.get('/api/history', async (req, res) => {
+  try {
+    const history = await DailyHistory.find({}).sort({ date: -1 });
+    res.json(history);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/history/:date', async (req, res) => {
+  try {
+    const record = await DailyHistory.findOne({ date: req.params.date });
+    res.json(record || null);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/history/:date', async (req, res) => {
+  try {
+    const { dayName, sport, entertainment, learning, habits, xpGained } = req.body;
+    const record = await DailyHistory.findOneAndUpdate(
+      { date: req.params.date },
+      { $set: { dayName, sport, entertainment, learning, habits, xpGained } },
+      { new: true, upsert: true }
+    );
+    res.json(record);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

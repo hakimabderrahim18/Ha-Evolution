@@ -3,27 +3,27 @@ import React, { createContext, useState, useEffect } from 'react';
 export const AppContext = createContext();
 
 const DEFAULT_SPORT_SCHEDULE = {
+  Saturday: { muscle: 'Core', name: 'Planks & Hanging Leg Raises', completed: false },
+  Sunday: { muscle: 'Rest', name: 'Active Recovery & Stretching', completed: false },
   Monday: { muscle: 'Chest', name: 'Barbell Bench Press & Flyes', completed: false },
   Tuesday: { muscle: 'Back', name: 'Deadlifts & Lat Pulldowns', completed: false },
   Wednesday: { muscle: 'Shoulders', name: 'Overhead Press & Lateral Raises', completed: false },
   Thursday: { muscle: 'Arms', name: 'Bicep Curls & Tricep Pushdowns', completed: false },
-  Friday: { muscle: 'Legs', name: 'Squats & Bulgarian Split Squats', completed: false },
-  Saturday: { muscle: 'Core', name: 'Planks & Hanging Leg Raises', completed: false },
-  Sunday: { muscle: 'Rest', name: 'Active Recovery & Stretching', completed: false }
+  Friday: { muscle: 'Legs', name: 'Squats & Bulgarian Split Squats', completed: false }
 };
 
 const DEFAULT_ENTERTAINMENT_SCHEDULE = {
-  Monday: null, Tuesday: null, Wednesday: null, Thursday: null, Friday: null, Saturday: null, Sunday: null
+  Saturday: null, Sunday: null, Monday: null, Tuesday: null, Wednesday: null, Thursday: null, Friday: null
 };
 
 const DEFAULT_LEARNING_SCHEDULE = {
-  Monday: null, Tuesday: null, Wednesday: null, Thursday: null, Friday: null, Saturday: null, Sunday: null
+  Saturday: null, Sunday: null, Monday: null, Tuesday: null, Wednesday: null, Thursday: null, Friday: null
 };
 
 const DEFAULT_WATCHLIST = [];
 
 const DEFAULT_HABITS_SCHEDULE = {
-  Monday: null, Tuesday: null, Wednesday: null, Thursday: null, Friday: null, Saturday: null, Sunday: null
+  Saturday: null, Sunday: null, Monday: null, Tuesday: null, Wednesday: null, Thursday: null, Friday: null
 };
 
 const DEFAULT_USER_STATS = {
@@ -43,6 +43,21 @@ export const ACHIEVEMENTS = [
   { id: 'week_warrior', title: 'Consistency King', description: 'Maintain a daily evolution streak of 7 days.', xpAward: 300, icon: '🔥' },
   { id: 'level_five', title: 'Ultimate Ascendant', description: 'Reach Level 5 in HA Life Evolution.', xpAward: 500, icon: '👑' }
 ];
+
+const getLocalDateString = () => {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const getDayNameOfDate = (dateStr) => {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const dateObj = new Date(year, month - 1, day);
+  const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  return daysOfWeek[dateObj.getDay()];
+};
 
 export const AppProvider = ({ children }) => {
   const API_BASE = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? '' : 'https://ha-evolution.onrender.com');
@@ -98,6 +113,190 @@ export const AppProvider = ({ children }) => {
 
     fetchAllData();
   }, []);
+
+  // Handle daily history snapshots and Saturday weekly resets
+  useEffect(() => {
+    if (loading) return;
+
+    const runDailyAndWeeklyChecks = async () => {
+      const todayDateStr = getLocalDateString();
+      const lastActive = userStats.lastActiveDate;
+
+      if (lastActive && lastActive !== todayDateStr) {
+        console.log(`Detecting new day transition from ${lastActive} to ${todayDateStr}`);
+
+        // 1. Save yesterday's snapshot to history
+        const yesterdayDate = new Date();
+        yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+        const yesterdayDateStr = `${yesterdayDate.getFullYear()}-${String(yesterdayDate.getMonth()+1).padStart(2,'0')}-${String(yesterdayDate.getDate()).padStart(2,'0')}`;
+        const yesterdayDayName = getDayNameOfDate(yesterdayDateStr);
+
+        try {
+          // Check if history already exists for yesterday
+          const histCheck = await fetch(`${API_BASE}/api/history/${yesterdayDateStr}`);
+          let existingRecord = null;
+          if (histCheck.ok) {
+            existingRecord = await histCheck.json();
+          }
+          
+          if (!existingRecord) {
+            // Compile yesterday's data
+            const sportItem = sportSchedule[yesterdayDayName] || { muscle: null, name: null, completed: false };
+            const entItem = entertainmentSchedule[yesterdayDayName] || { title: null, type: null, genre: null, completed: false };
+            const learnItem = learningSchedule[yesterdayDayName] || { subject: null, objective: null, hours: 0, minutes: 0, completed: false };
+            const habitItem = habitsSchedule[yesterdayDayName] || { surah: null, onePlusActivity: null, completed: false };
+
+            const historyPayload = {
+              dayName: yesterdayDayName,
+              sport: {
+                muscle: sportItem.muscle,
+                name: sportItem.name,
+                completed: sportItem.completed
+              },
+              entertainment: {
+                title: entItem.title,
+                type: entItem.type,
+                genre: entItem.genre,
+                completed: entItem.completed
+              },
+              learning: {
+                subject: learnItem.subject,
+                objective: learnItem.objective,
+                hours: learnItem.hours,
+                minutes: learnItem.minutes,
+                completed: learnItem.completed
+              },
+              habits: {
+                surah: habitItem.surah,
+                onePlusActivity: habitItem.onePlusActivity,
+                completed: habitItem.completed
+              },
+              xpGained: 0
+            };
+
+            console.log(`Saving daily snapshot for ${yesterdayDateStr} (${yesterdayDayName})...`);
+            await fetch(`${API_BASE}/api/history/${yesterdayDateStr}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(historyPayload)
+            });
+          }
+        } catch (err) {
+          console.error("Failed to save yesterday's history snapshot:", err);
+        }
+
+        // 2. Saturday Weekly Reset
+        const todayDayName = getDayNameOfDate(todayDateStr);
+        if (todayDayName === 'Saturday') {
+          console.log("Saturday detected! Refreshing completion states...");
+
+          // Reset frontend states locally
+          setSportSchedule(prev => {
+            const updated = {};
+            Object.keys(prev).forEach(d => {
+              updated[d] = { ...prev[d], completed: false };
+            });
+            return updated;
+          });
+
+          setEntertainmentSchedule(prev => {
+            const updated = {};
+            Object.keys(prev).forEach(d => {
+              updated[d] = prev[d] ? { ...prev[d], completed: false } : null;
+            });
+            return updated;
+          });
+
+          setLearningSchedule(prev => {
+            const updated = {};
+            Object.keys(prev).forEach(d => {
+              updated[d] = prev[d] ? { ...prev[d], completed: false } : null;
+            });
+            return updated;
+          });
+
+          setHabitsSchedule(prev => {
+            const updated = {};
+            Object.keys(prev).forEach(d => {
+              updated[d] = prev[d] ? { ...prev[d], completed: false } : null;
+            });
+            return updated;
+          });
+
+          // Sync resets with backend
+          const resetDAYS = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+          try {
+            await Promise.all([
+              ...resetDAYS.map(day => {
+                const sport = sportSchedule[day];
+                if (sport) {
+                  return fetch(`${API_BASE}/api/sport/${day}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...sport, completed: false })
+                  });
+                }
+                return Promise.resolve();
+              }),
+              ...resetDAYS.map(day => {
+                const ent = entertainmentSchedule[day];
+                if (ent) {
+                  return fetch(`${API_BASE}/api/entertainment/${day}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...ent, completed: false })
+                  });
+                }
+                return Promise.resolve();
+              }),
+              ...resetDAYS.map(day => {
+                const learn = learningSchedule[day];
+                if (learn) {
+                  return fetch(`${API_BASE}/api/learning/${day}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...learn, completed: false })
+                  });
+                }
+                return Promise.resolve();
+              }),
+              ...resetDAYS.map(day => {
+                const habit = habitsSchedule[day];
+                if (habit) {
+                  return fetch(`${API_BASE}/api/habits/${day}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...habit, completed: false })
+                  });
+                }
+                return Promise.resolve();
+              })
+            ]);
+            console.log("Weekly completions database reset complete.");
+          } catch (err) {
+            console.error("Failed to sync weekly resets with database:", err);
+          }
+        }
+
+        // 3. Update lastActiveDate in userStats
+        const updatedStats = { ...userStats, lastActiveDate: todayDateStr };
+        setUserStats(updatedStats);
+
+        try {
+          await fetch(`${API_BASE}/api/stats`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedStats)
+          });
+          console.log(`Updated lastActiveDate to ${todayDateStr}`);
+        } catch (err) {
+          console.error("Failed to update userStats date:", err);
+        }
+      }
+    };
+
+    runDailyAndWeeklyChecks();
+  }, [loading]);
 
   // Sync userStats automatically whenever stats are updated (post-load)
   useEffect(() => {
@@ -432,7 +631,7 @@ export const AppProvider = ({ children }) => {
   };
 
   const resetWeeklyData = async () => {
-    const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const DAYS = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
     setSportSchedule(DEFAULT_SPORT_SCHEDULE);
     setEntertainmentSchedule(DEFAULT_ENTERTAINMENT_SCHEDULE);
     setLearningSchedule(DEFAULT_LEARNING_SCHEDULE);

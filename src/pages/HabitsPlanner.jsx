@@ -27,11 +27,11 @@ const ONE_PLUS_PRESETS = [
 
 export default function HabitsPlanner() {
   const { habitsSchedule, updateHabitsWorkout, toggleHabitCompleted, loading } = useContext(AppContext);
-  const [activeDay, setActiveDay] = useState('Monday');
+  const [activeDay, setActiveDay] = useState('Saturday');
   const [surah, setSurah] = useState('');
   const [onePlus, setOnePlus] = useState('');
 
-  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const days = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
   useEffect(() => {
     if (habitsSchedule && habitsSchedule[activeDay]) {

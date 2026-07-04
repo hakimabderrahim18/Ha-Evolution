@@ -30,7 +30,7 @@ export default function EvolutionAnalytics() {
   const consistencyScore = totalPlanned > 0 ? Math.round((totalCompleted / totalPlanned) * 100) : 0;
 
   // Chart data: daily completions count mapping
-  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const days = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
   const dailyCompletions = days.map((day) => {
     let count = 0;
     if (sportSchedule[day]?.completed) count++;

@@ -19,7 +19,7 @@ export default function UnifiedCalendar() {
   const [viewMode, setViewMode] = useState('week'); // day, week, month
   const [selectedDayDetail, setSelectedDayDetail] = useState(null);
 
-  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const days = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
   const getPillsForDay = (day) => {
     const pills = [];

@@ -3,9 +3,6 @@ import { motion } from 'framer-motion';
 import { FiTrendingUp, FiAward, FiZap, FiCheck, FiArrowRight } from 'react-icons/fi';
 import { AppContext } from '../context/AppContext';
 import GlassCard from '../components/GlassCard';
-import PrayersMatrix from '../components/PrayersMatrix';
-import HygieneTracker from '../components/HygieneTracker';
-import YoutubeStudy from '../components/YoutubeStudy';
 import confetti from 'canvas-confetti';
 
 const QUOTES = [
@@ -438,18 +435,6 @@ export default function Dashboard() {
             )}
           </div>
         </GlassCard>
-      </div>
-
-      {/* Daily Rituals Heading */}
-      <h3 className="font-space text-lg font-bold text-white uppercase tracking-wider mb-6 mt-12 flex items-center gap-2">
-        <FiZap className="text-success w-5 h-5 animate-pulse" /> Today's Daily Rituals <span className="text-white/30 text-sm">({todayDayName})</span>
-      </h3>
-
-      {/* Daily Rituals Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
-        <PrayersMatrix />
-        <HygieneTracker />
-        <YoutubeStudy />
       </div>
     </motion.div>
   );

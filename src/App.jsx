@@ -18,6 +18,7 @@ import UnifiedCalendar from './pages/UnifiedCalendar';
 import EvolutionAnalytics from './pages/EvolutionAnalytics';
 import HabitsPlanner from './pages/HabitsPlanner';
 import HistoryPlanner from './pages/HistoryPlanner';
+import DailyRituals from './pages/DailyRituals';
 
 import './App.css';
 
@@ -72,6 +73,7 @@ function AppContent() {
             <Route path="/analytics" element={<EvolutionAnalytics />} />
             <Route path="/habits" element={<HabitsPlanner />} />
             <Route path="/history" element={<HistoryPlanner />} />
+            <Route path="/rituals" element={<DailyRituals />} />
           </Routes>
         </AnimatePresence>
       </main>

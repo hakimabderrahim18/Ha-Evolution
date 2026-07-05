@@ -26,43 +26,53 @@ export default function FloatingNav() {
         initial={{ y: 50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 200, damping: 22 }}
-        className="glass rounded-full px-6 py-3 flex items-center justify-between gap-6 shadow-[0_10px_30px_rgba(0,0,0,0.5)] border-white/10 relative"
+        className="glass rounded-full px-4 md:px-6 py-2.5 flex items-center justify-between shadow-[0_10px_30px_rgba(0,0,0,0.5)] border-white/10 relative max-w-full"
       >
         {/* Neon Glow underlay */}
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-accent/5 via-primary/5 to-accent/5 rounded-full blur-md" />
 
-        {links.map((link) => (
-          <NavLink
-            key={link.to}
-            to={link.to}
-            className={({ isActive }) =>
-              `relative p-2.5 rounded-full transition-all duration-300 group flex flex-col items-center cursor-pointer ${
-                isActive ? 'text-primary' : 'text-white/60 hover:text-white hover:scale-105'
-              }`
-            }
-          >
-            {({ isActive }) => (
-              <>
-                {isActive && (
-                  <motion.div
-                    layoutId="activeNavIndicator"
-                    className="absolute inset-0 bg-white/5 rounded-full border border-white/10 shadow-[0_0_15px_rgba(255,213,74,0.15)]"
-                    transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                  />
-                )}
-                <span className="relative z-10">{link.icon}</span>
-                
-                {/* Floating labels on hover */}
-                <span className="absolute bottom-14 left-1/2 -translate-x-1/2 glass px-3 py-1 rounded-lg text-[10px] font-space font-medium tracking-wider text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none uppercase whitespace-nowrap border-white/5">
-                  {link.label}
-                </span>
-              </>
-            )}
-          </NavLink>
-        ))}
+        {/* Scrollable links row on mobile */}
+        <div
+          className="flex items-center gap-1.5 md:gap-4 overflow-x-auto pr-2"
+          style={{
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            WebkitOverflowScrolling: 'touch'
+          }}
+        >
+          {links.map((link) => (
+            <NavLink
+              key={link.to}
+              to={link.to}
+              className={({ isActive }) =>
+                `relative p-2.5 rounded-full transition-all duration-300 group flex flex-col items-center cursor-pointer shrink-0 ${
+                  isActive ? 'text-primary' : 'text-white/60 hover:text-white hover:scale-105'
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeNavIndicator"
+                      className="absolute inset-0 bg-white/5 rounded-full border border-white/10 shadow-[0_0_15px_rgba(255,213,74,0.15)]"
+                      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                    />
+                  )}
+                  <span className="relative z-10">{link.icon}</span>
+                  
+                  {/* Floating labels on hover */}
+                  <span className="absolute bottom-14 left-1/2 -translate-x-1/2 glass px-3 py-1 rounded-lg text-[10px] font-space font-medium tracking-wider text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none uppercase whitespace-nowrap border-white/5">
+                    {link.label}
+                  </span>
+                </>
+              )}
+            </NavLink>
+          ))}
+        </div>
 
-        {/* Level Indicator Mini-Badge */}
-        <div className="h-9 w-9 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center font-space text-xs font-bold text-[#0B1220] shadow-[0_0_10px_rgba(255,213,74,0.3)] ml-2 border border-white/10 select-none">
+        {/* Level Indicator Mini-Badge (Pinned on right) */}
+        <div className="h-9 w-9 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center font-space text-xs font-bold text-[#0B1220] shadow-[0_0_10px_rgba(255,213,74,0.3)] ml-2 border border-white/10 select-none shrink-0">
           Lvl {userStats.level}
         </div>
       </motion.nav>

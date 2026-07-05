@@ -23,6 +23,8 @@ export default function Dashboard() {
     toggleLearningCompleted,
     habitsSchedule,
     toggleHabitCompleted,
+    youtubeSchedule,
+    toggleYoutubeCompleted,
     userStats,
     addXP,
     loading
@@ -59,18 +61,21 @@ export default function Dashboard() {
   const todayPlay = entertainmentSchedule[todayDayName];
   const todayLearn = learningSchedule[todayDayName];
   const todayHabit = habitsSchedule?.[todayDayName];
+  const todayYoutube = youtubeSchedule?.[todayDayName];
 
   // Calculate percentages
   const completedWorkoutsCount = Object.values(sportSchedule).filter(w => w.completed).length;
   const completedPlayCount = Object.values(entertainmentSchedule).filter(p => p && p.completed).length;
   const completedLearnCount = Object.values(learningSchedule).filter(l => l && l.completed).length;
   const completedHabitsCount = Object.values(habitsSchedule || {}).filter(h => h && h.completed).length;
+  const completedYoutubeCount = Object.values(youtubeSchedule || {}).filter(y => y && y.completed).length;
 
   const totalTasks = 7;
   const workoutPercent = Math.round((completedWorkoutsCount / totalTasks) * 100);
   const playPercent = Math.round((completedPlayCount / totalTasks) * 100);
   const learnPercent = Math.round((completedLearnCount / totalTasks) * 100);
   const habitsPercent = Math.round((completedHabitsCount / totalTasks) * 100);
+  const youtubePercent = Math.round((completedYoutubeCount / totalTasks) * 100);
 
   const handleCompleteConfetti = (type, day) => {
     // Trigger confetti
@@ -85,6 +90,7 @@ export default function Dashboard() {
     if (type === 'play') toggleEntertainmentCompleted(day);
     if (type === 'learn') toggleLearningCompleted(day);
     if (type === 'habits') toggleHabitCompleted(day);
+    if (type === 'youtube') toggleYoutubeCompleted(day);
   };
 
   const nextLevelXp = userStats.level * 300;
@@ -160,7 +166,7 @@ export default function Dashboard() {
       </div>
 
       {/* Statistics Overview Ring Columns */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-12">
         {/* Fitness Progress Ring */}
         <GlassCard className="flex flex-col items-center justify-center p-6 text-center border-accent/20" glow={true} glowColor="accent">
           <h3 className="font-space text-xs font-bold text-accent tracking-[2px] uppercase mb-4">FITNESS MATRIX</h3>
@@ -282,6 +288,74 @@ export default function Dashboard() {
             {completedHabitsCount} of 7 daily habits achieved
           </p>
         </GlassCard>
+
+        {/* Youtube Progress Ring */}
+        <GlassCard className="flex flex-col items-center justify-center p-6 text-center border-red-500/20" glow={true} glowColor="error">
+          <h3 className="font-space text-xs font-bold text-red-500 tracking-[2px] uppercase mb-4">YOUTUBE STUDY</h3>
+          <div className="relative w-36 h-36 flex items-center justify-center mb-4">
+            <svg className="w-full h-full transform -rotate-90">
+              <circle cx="72" cy="72" r="54" stroke="rgba(255,255,255,0.03)" strokeWidth="8" fill="transparent" />
+              <motion.circle
+                cx="72"
+                cy="72"
+                r="54"
+                stroke="#EF4444"
+                strokeWidth="8"
+                fill="transparent"
+                strokeDasharray={339.29}
+                initial={{ strokeDashoffset: 339.29 }}
+                animate={{ strokeDashoffset: 339.29 - (339.29 * (youtubePercent || 0)) / 100 }}
+                transition={{ duration: 1, ease: 'easeOut' }}
+                strokeLinecap="round"
+              />
+            </svg>
+            <div className="absolute text-center">
+              <span className="text-3xl font-space font-extrabold text-white">{youtubePercent}%</span>
+              <span className="text-[10px] text-white/40 block tracking-wider uppercase mt-0.5">COMPLETED</span>
+            </div>
+          </div>
+          <p className="text-white/60 text-xs">
+            {completedYoutubeCount} of 7 daily study logs achieved
+          </p>
+        </GlassCard>
+
+        {/* Youtube Card */}
+        <GlassCard className="border-red-500/15 flex flex-col justify-between h-[220px]" tilt={true}>
+          <div>
+            <div className="flex justify-between items-start mb-4">
+              <span className="text-xs font-space font-bold text-red-400 tracking-widest uppercase bg-red-500/10 px-3 py-1 rounded-full border border-red-500/20">YOUTUBE</span>
+              {todayYoutube?.completed && <span className="text-success text-xs font-space font-bold flex items-center gap-1">✓ COMPLETED</span>}
+            </div>
+            {todayYoutube && todayYoutube.title ? (
+              <>
+                <h4 className="font-space text-lg font-bold mb-1 text-white truncate">{todayYoutube.title}</h4>
+                <p className="text-white/60 text-xs">Channel: <strong className="text-red-400">{todayYoutube.channel}</strong></p>
+              </>
+            ) : (
+              <>
+                <h4 className="font-space text-xl font-bold mb-1 text-white">Unscheduled</h4>
+                <p className="text-white/60 text-xs">No study video set for today. Head to the YouTube tab to schedule one!</p>
+              </>
+            )}
+          </div>
+          <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center">
+            <span className="text-[10px] text-white/40 font-space uppercase">Target: Study</span>
+            {todayYoutube ? (
+              todayYoutube.completed ? (
+                <span className="text-xs text-white/40 italic">Study log complete!</span>
+              ) : (
+                <button
+                  onClick={() => handleCompleteConfetti('youtube', todayDayName)}
+                  className="px-4 py-2 rounded-xl bg-red-500 text-white font-space font-bold text-xs hover:shadow-[0_0_15px_rgba(239,68,68,0.4)] active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
+                >
+                  <FiCheck className="w-3.5 h-3.5" /> MARK DONE
+                </button>
+              )
+            ) : (
+              <span className="text-xs text-white/40 italic">Empty focus</span>
+            )}
+          </div>
+        </GlassCard>
       </div>
 
       {/* Today's Tasks Heading */}
@@ -290,7 +364,7 @@ export default function Dashboard() {
       </h3>
 
       {/* Today's 3D Action Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         {/* Fitness Card */}
         <GlassCard className="border-accent/15 flex flex-col justify-between h-[220px]" tilt={true}>
           <div>
@@ -426,6 +500,44 @@ export default function Dashboard() {
                 <button
                   onClick={() => handleCompleteConfetti('habits', todayDayName)}
                   className="px-4 py-2 rounded-xl bg-cyan-400 text-[#0B1220] font-space font-bold text-xs hover:shadow-[0_0_15px_rgba(0,229,255,0.4)] active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
+                >
+                  <FiCheck className="w-3.5 h-3.5" /> MARK DONE
+                </button>
+              )
+            ) : (
+              <span className="text-xs text-white/40 italic">Empty focus</span>
+            )}
+          </div>
+        </GlassCard>
+
+        {/* Youtube Card */}
+        <GlassCard className="border-red-500/15 flex flex-col justify-between h-[220px]" tilt={true}>
+          <div>
+            <div className="flex justify-between items-start mb-4">
+              <span className="text-xs font-space font-bold text-red-400 tracking-widest uppercase bg-red-500/10 px-3 py-1 rounded-full border border-red-500/20">YOUTUBE</span>
+              {todayYoutube?.completed && <span className="text-success text-xs font-space font-bold flex items-center gap-1">✓ COMPLETED</span>}
+            </div>
+            {todayYoutube && todayYoutube.title ? (
+              <>
+                <h4 className="font-space text-lg font-bold mb-1 text-white truncate">{todayYoutube.title}</h4>
+                <p className="text-white/60 text-xs">Channel: <strong className="text-red-400">{todayYoutube.channel}</strong></p>
+              </>
+            ) : (
+              <>
+                <h4 className="font-space text-xl font-bold mb-1 text-white">Unscheduled</h4>
+                <p className="text-white/60 text-xs">No study video set for today. Head to the YouTube tab to schedule one!</p>
+              </>
+            )}
+          </div>
+          <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center">
+            <span className="text-[10px] text-white/40 font-space uppercase">Target: Study</span>
+            {todayYoutube ? (
+              todayYoutube.completed ? (
+                <span className="text-xs text-white/40 italic">Study log complete!</span>
+              ) : (
+                <button
+                  onClick={() => handleCompleteConfetti('youtube', todayDayName)}
+                  className="px-4 py-2 rounded-xl bg-red-500 text-white font-space font-bold text-xs hover:shadow-[0_0_15px_rgba(239,68,68,0.4)] active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
                 >
                   <FiCheck className="w-3.5 h-3.5" /> MARK DONE
                 </button>

@@ -22,6 +22,10 @@ const DEFAULT_LEARNING_SCHEDULE = {
 
 const DEFAULT_WATCHLIST = [];
 
+const DEFAULT_YOUTUBE_SCHEDULE = {
+  Saturday: null, Sunday: null, Monday: null, Tuesday: null, Wednesday: null, Thursday: null, Friday: null
+};
+
 const DEFAULT_HABITS_SCHEDULE = {
   Saturday: null, Sunday: null, Monday: null, Tuesday: null, Wednesday: null, Thursday: null, Friday: null
 };
@@ -68,6 +72,7 @@ export const AppProvider = ({ children }) => {
   const [habitsSchedule, setHabitsSchedule] = useState(DEFAULT_HABITS_SCHEDULE);
   const [userStats, setUserStats] = useState(DEFAULT_USER_STATS);
   const [todayHistory, setTodayHistory] = useState(null);
+  const [youtubeSchedule, setYoutubeSchedule] = useState(DEFAULT_YOUTUBE_SCHEDULE);
 
   const [loading, setLoading] = useState(true);
   const [levelUpData, setLevelUpData] = useState(null);
@@ -103,6 +108,7 @@ export const AppProvider = ({ children }) => {
           fetchResource(API_BASE + '/api/watchlist', setWatchlist, 'watchlist'),
           fetchResource(API_BASE + '/api/learning', setLearningSchedule, 'learning'),
           fetchResource(API_BASE + '/api/stats', setUserStats, 'stats'),
+          fetchResource(API_BASE + '/api/youtube', setYoutubeSchedule, 'youtube'),
           fetchResource(API_BASE + '/api/habits', setHabitsSchedule, 'habits'),
           fetchResource(API_BASE + '/api/history/' + getLocalDateString(), setTodayHistory, 'todayHistory')
         ]);
@@ -126,6 +132,7 @@ export const AppProvider = ({ children }) => {
     const ent = entertainmentSchedule[todayDayName];
     const learn = learningSchedule[todayDayName];
     const habit = habitsSchedule[todayDayName];
+    const yt = youtubeSchedule[todayDayName];
 
     const payload = {
       dayName: todayDayName,
@@ -152,7 +159,10 @@ export const AppProvider = ({ children }) => {
         onePlusActivity: habit.onePlusActivity,
         completed: habit.completed
       } : { surah: null, onePlusActivity: null, completed: false },
-      youtube: { title: "", completed: false },
+      youtube: yt ? {
+        title: yt.title,
+        completed: yt.completed
+      } : { title: "", completed: false },
       grooming: { brushAM: false, brushPM: false, skincare: false, shower: false, floss: false },
       prayers: { fajr: false, dhuhr: false, asr: false, maghrib: false, isha: false },
       xpGained: 0
@@ -252,6 +262,7 @@ export const AppProvider = ({ children }) => {
             const entItem = entertainmentSchedule[yesterdayDayName] || { title: null, type: null, genre: null, completed: false };
             const learnItem = learningSchedule[yesterdayDayName] || { subject: null, objective: null, hours: 0, minutes: 0, completed: false };
             const habitItem = habitsSchedule[yesterdayDayName] || { surah: null, onePlusActivity: null, completed: false };
+            const youtubeItem = youtubeSchedule[yesterdayDayName] || { title: "", completed: false };
 
             const historyPayload = {
               dayName: yesterdayDayName,
@@ -277,6 +288,10 @@ export const AppProvider = ({ children }) => {
                 surah: habitItem.surah,
                 onePlusActivity: habitItem.onePlusActivity,
                 completed: habitItem.completed
+              },
+              youtube: {
+                title: youtubeItem.title,
+                completed: youtubeItem.completed
               },
               xpGained: 0
             };
@@ -330,6 +345,14 @@ export const AppProvider = ({ children }) => {
             return updated;
           });
 
+          setYoutubeSchedule(prev => {
+            const updated = {};
+            Object.keys(prev).forEach(d => {
+              updated[d] = prev[d] ? { ...prev[d], completed: false } : null;
+            });
+            return updated;
+          });
+
           // Sync resets with backend
           const resetDAYS = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
           try {
@@ -374,6 +397,17 @@ export const AppProvider = ({ children }) => {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ ...habit, completed: false })
+                  });
+                }
+                return Promise.resolve();
+              }),
+              ...resetDAYS.map(day => {
+                const ytItem = youtubeSchedule[day];
+                if (ytItem) {
+                  return fetch(`${API_BASE}/api/youtube/${day}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...ytItem, completed: false })
                   });
                 }
                 return Promise.resolve();
@@ -795,6 +829,57 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  const updateYoutubeSchedule = async (day, data) => {
+    setYoutubeSchedule(prev => ({
+      ...prev,
+      [day]: data
+    }));
+
+    try {
+      await fetch(`${API_BASE}/api/youtube/${day}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data === null ? { title: "" } : data)
+      });
+    } catch (err) {
+      console.error(err);
+    }
+    const todayDayName = getDayNameOfDate(getLocalDateString());
+    if (day === todayDayName) {
+      syncTodayHistoryField('youtube', data ? { title: data.title, completed: data.completed } : { title: "", completed: false });
+    }
+  };
+
+  const toggleYoutubeCompleted = async (day) => {
+    const item = youtubeSchedule[day];
+    if (!item) return;
+    const nextCompleted = !item.completed;
+    const updatedItem = { ...item, completed: nextCompleted };
+
+    setYoutubeSchedule(prev => ({
+      ...prev,
+      [day]: updatedItem
+    }));
+
+    if (nextCompleted) {
+      setTimeout(() => addXP(30), 50);
+    }
+
+    try {
+      await fetch(`${API_BASE}/api/youtube/${day}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedItem)
+      });
+    } catch (err) {
+      console.error(err);
+    }
+    const todayDayName = getDayNameOfDate(getLocalDateString());
+    if (day === todayDayName) {
+      syncTodayHistoryField('youtube', { title: updatedItem.title, completed: nextCompleted });
+    }
+  };
+
   const updateHabitsWorkout = async (day, surah, onePlusActivity) => {
     const updatedHabit = { surah, onePlusActivity, completed: habitsSchedule[day]?.completed || false };
     setHabitsSchedule(prev => ({
@@ -854,6 +939,7 @@ export const AppProvider = ({ children }) => {
     setEntertainmentSchedule(DEFAULT_ENTERTAINMENT_SCHEDULE);
     setLearningSchedule(DEFAULT_LEARNING_SCHEDULE);
     setHabitsSchedule(DEFAULT_HABITS_SCHEDULE);
+    setYoutubeSchedule(DEFAULT_YOUTUBE_SCHEDULE);
     setUserStats(prev => ({
       ...prev,
       streak: prev.streak + 1
@@ -881,6 +967,11 @@ export const AppProvider = ({ children }) => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ surah: null })
+        })),
+        ...DAYS.map(day => fetch(`${API_BASE}/api/youtube/${day}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: "" })
         }))
       ]);
     } catch (err) {
@@ -918,6 +1009,9 @@ export const AppProvider = ({ children }) => {
       toggleTodayPrayer,
       toggleTodayGrooming,
       updateTodayYoutube,
+      youtubeSchedule,
+      updateYoutubeSchedule,
+      toggleYoutubeCompleted,
       loading
     }}>
       {children}

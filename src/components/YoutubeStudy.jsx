@@ -1,20 +1,19 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext } from 'react';
+import { NavLink } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import GlassCard from './GlassCard';
 import confetti from 'canvas-confetti';
 
 export default function YoutubeStudy() {
-  const { todayHistory, updateTodayYoutube } = useContext(AppContext);
-  const [ytTitle, setYtTitle] = useState('');
+  const { todayHistory, youtubeSchedule, toggleYoutubeCompleted } = useContext(AppContext);
 
-  useEffect(() => {
-    if (todayHistory?.youtube?.title !== undefined) {
-      setYtTitle(todayHistory.youtube.title || '');
-    }
-  }, [todayHistory]);
+  const todayDayName = todayHistory?.dayName || 'Saturday';
+  const todayTask = youtubeSchedule?.[todayDayName];
 
   const handleToggleCompleted = () => {
-    const nextComp = !(todayHistory?.youtube?.completed || false);
+    if (!todayTask?.title) return;
+    
+    const nextComp = !todayTask.completed;
     if (nextComp) {
       confetti({
         particleCount: 50,
@@ -22,11 +21,7 @@ export default function YoutubeStudy() {
         colors: ['#EF4444', '#FCA5A5', '#FFFFFF']
       });
     }
-    updateTodayYoutube(ytTitle, nextComp);
-  };
-
-  const handleInputBlur = () => {
-    updateTodayYoutube(ytTitle, todayHistory?.youtube?.completed || false);
+    toggleYoutubeCompleted(todayDayName);
   };
 
   return (
@@ -37,35 +32,42 @@ export default function YoutubeStudy() {
         </span>
         <h4 className="font-space text-sm md:text-base font-bold text-white mb-4">Daily Video Task (+30 XP)</h4>
 
-        <div className="flex flex-col gap-4">
-          <div>
-            <label className="block text-[9px] font-space text-white/40 uppercase mb-1.5">Educational Video Title</label>
-            <input
-              type="text"
-              placeholder="e.g. Next.js Architecture / Physics video"
-              value={ytTitle}
-              onChange={(e) => setYtTitle(e.target.value)}
-              onBlur={handleInputBlur}
-              className="w-full bg-[#121A2C]/80 border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-red-400 placeholder:text-white/20"
-            />
-          </div>
+        {todayTask && todayTask.title ? (
+          <div className="flex flex-col gap-4">
+            <div className="bg-[#121A2C]/40 border border-white/5 p-3 rounded-xl">
+              <span className="block text-[9px] font-space text-white/40 uppercase mb-1">Today's Focus Video</span>
+              <h5 className="font-space text-sm font-bold text-white truncate">{todayTask.title}</h5>
+              <span className="text-[10px] text-red-400 font-semibold uppercase font-space">Channel: {todayTask.channel}</span>
+            </div>
 
-          <button
-            onClick={handleToggleCompleted}
-            className={`w-full py-3 rounded-xl font-space font-bold text-xs border transition-all duration-300 cursor-pointer ${
-              todayHistory?.youtube?.completed
-                ? 'bg-red-500/20 border-red-500/30 text-red-400 shadow-[0_0_12px_rgba(239,68,68,0.2)]'
-                : 'bg-white/5 border-white/5 text-white/70 hover:bg-white/10 hover:border-white/10'
-            }`}
-          >
-            {todayHistory?.youtube?.completed ? '✓ VIDEO STUDY COMPLETED' : 'MARK VIDEO DONE'}
-          </button>
-        </div>
+            <button
+              onClick={handleToggleCompleted}
+              className={`w-full py-3 rounded-xl font-space font-bold text-xs border transition-all duration-300 cursor-pointer ${
+                todayTask.completed
+                  ? 'bg-red-500/20 border-red-500/30 text-red-400 shadow-[0_0_12px_rgba(239,68,68,0.2)]'
+                  : 'bg-white/5 border-white/5 text-white/70 hover:bg-white/10 hover:border-white/10'
+              }`}
+            >
+              {todayTask.completed ? '✓ VIDEO STUDY COMPLETED' : 'MARK VIDEO DONE'}
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-6 text-center">
+            <span className="text-3xl mb-2">🎥</span>
+            <p className="text-white/40 text-xs italic mb-4">No video programmed for {todayDayName}.</p>
+            <NavLink
+              to="/youtube"
+              className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-space font-bold text-[10px] uppercase transition-all tracking-wider cursor-pointer"
+            >
+              PROGRAM WEEK
+            </NavLink>
+          </div>
+        )}
       </div>
       <div className="mt-6 pt-4 border-t border-white/5 flex justify-between items-center text-left">
         <span className="text-[10px] text-white/40 font-space uppercase">Target:</span>
         <span className="text-xs text-red-400 font-space font-bold bg-red-500/10 px-2 py-0.5 rounded-md border border-red-500/15">
-          1 Study Video Logged
+          Weekly Study Plan
         </span>
       </div>
     </GlassCard>

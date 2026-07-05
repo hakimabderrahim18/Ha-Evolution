@@ -10,7 +10,8 @@ import {
   LearningDay,
   UserStats,
   QuranHabit,
-  DailyHistory
+  DailyHistory,
+  YoutubeSchedule
 } from './models.js';
 
 dotenv.config();
@@ -54,6 +55,16 @@ const DEFAULT_HABIT = {
   Wednesday: { surah: 'Surah Al-Waqiah', onePlusActivity: 'Help someone in need' },
   Thursday: { surah: 'Surah Ar-Rahman', onePlusActivity: 'Read 1 Islamic Article' },
   Friday: { surah: 'Surah Al-Kahf', onePlusActivity: 'Send blessings (Salawat) 100x' }
+};
+
+const DEFAULT_YOUTUBE = {
+  Saturday: { title: 'Clean Code & Refactoring', channel: 'Uncle Bob' },
+  Sunday: { title: 'System Architecture Basics', channel: 'ByteByteGo' },
+  Monday: { title: 'JavaScript Advanced Concepts', channel: 'Web Dev Simplified' },
+  Tuesday: { title: 'Database Design & Indexing', channel: 'Hussein Nasser' },
+  Wednesday: { title: 'CSS Grid & Flexbox Masterclass', channel: 'Kevin Powell' },
+  Thursday: { title: 'React Performance Tuning', channel: 'Jack Herrington' },
+  Friday: { title: 'Node.js Core Concepts', channel: 'Dave Gray' }
 };
 
 // Seed database with default schedules if collection is empty
@@ -128,6 +139,20 @@ async function seedDatabase() {
           day,
           surah: DEFAULT_HABIT[day].surah,
           onePlusActivity: DEFAULT_HABIT[day].onePlusActivity,
+          completed: false
+        });
+      }
+    }
+
+    // 6. Seed Youtube Schedule
+    const youtubeCount = await YoutubeSchedule.countDocuments();
+    if (youtubeCount === 0) {
+      console.log('Seeding default Youtube study schedule...');
+      for (const day of DAYS) {
+        await YoutubeSchedule.create({
+          day,
+          title: DEFAULT_YOUTUBE[day].title,
+          channel: DEFAULT_YOUTUBE[day].channel,
           completed: false
         });
       }
@@ -338,6 +363,44 @@ app.post('/api/habits/:day', async (req, res) => {
       { new: true, upsert: true }
     );
     res.json(habit);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 8. Youtube Study Routes
+app.get('/api/youtube', async (req, res) => {
+  try {
+    const youtubeDays = await YoutubeSchedule.find({});
+    const schedule = {};
+    youtubeDays.forEach(y => {
+      schedule[y.day] = y.title ? {
+        title: y.title,
+        channel: y.channel,
+        completed: y.completed
+      } : null;
+    });
+    res.json(schedule);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/youtube/:day', async (req, res) => {
+  try {
+    const { title, channel, completed } = req.body;
+    const updateObj = title === null ? {
+      title: "", channel: "", completed: false
+    } : {
+      title, channel, completed
+    };
+
+    const youtubeDay = await YoutubeSchedule.findOneAndUpdate(
+      { day: req.params.day },
+      { $set: updateObj },
+      { new: true, upsert: true }
+    );
+    res.json(youtubeDay);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

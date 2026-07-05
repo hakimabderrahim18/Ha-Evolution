@@ -19,6 +19,7 @@ import EvolutionAnalytics from './pages/EvolutionAnalytics';
 import HabitsPlanner from './pages/HabitsPlanner';
 import HistoryPlanner from './pages/HistoryPlanner';
 import DailyRituals from './pages/DailyRituals';
+import YoutubePlanner from './pages/YoutubePlanner';
 
 import './App.css';
 
@@ -74,6 +75,7 @@ function AppContent() {
             <Route path="/habits" element={<HabitsPlanner />} />
             <Route path="/history" element={<HistoryPlanner />} />
             <Route path="/rituals" element={<DailyRituals />} />
+            <Route path="/youtube" element={<YoutubePlanner />} />
           </Routes>
         </AnimatePresence>
       </main>

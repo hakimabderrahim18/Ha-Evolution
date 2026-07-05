@@ -364,10 +364,10 @@ app.get('/api/history/:date', async (req, res) => {
 
 app.post('/api/history/:date', async (req, res) => {
   try {
-    const { dayName, sport, entertainment, learning, habits, xpGained } = req.body;
+    const { dayName, sport, entertainment, learning, habits, youtube, grooming, prayers, xpGained } = req.body;
     const record = await DailyHistory.findOneAndUpdate(
       { date: req.params.date },
-      { $set: { dayName, sport, entertainment, learning, habits, xpGained } },
+      { $set: { dayName, sport, entertainment, learning, habits, youtube, grooming, prayers, xpGained } },
       { new: true, upsert: true }
     );
     res.json(record);

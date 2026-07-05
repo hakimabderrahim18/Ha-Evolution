@@ -24,11 +24,23 @@ export default function Dashboard() {
     habitsSchedule,
     toggleHabitCompleted,
     userStats,
+    todayHistory,
+    toggleTodayPrayer,
+    toggleTodayGrooming,
+    updateTodayYoutube,
+    addXP,
     loading
   } = useContext(AppContext);
 
   const [quote, setQuote] = useState('');
   const [greeting, setGreeting] = useState('Ascendant');
+  const [ytTitle, setYtTitle] = useState('');
+
+  useEffect(() => {
+    if (todayHistory?.youtube?.title !== undefined) {
+      setYtTitle(todayHistory.youtube.title || '');
+    }
+  }, [todayHistory]);
 
   useEffect(() => {
     // Pick random quote
@@ -432,6 +444,147 @@ export default function Dashboard() {
             ) : (
               <span className="text-xs text-white/40 italic">Empty focus</span>
             )}
+          </div>
+        </GlassCard>
+      </div>
+
+      {/* Daily Rituals Heading */}
+      <h3 className="font-space text-lg font-bold text-white uppercase tracking-wider mb-6 mt-12 flex items-center gap-2">
+        <FiZap className="text-success w-5 h-5 animate-pulse" /> Today's Daily Rituals <span className="text-white/30 text-sm">({todayDayName})</span>
+      </h3>
+
+      {/* Daily Rituals Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+        
+        {/* Prayers Tracker Card */}
+        <GlassCard className="border-emerald-500/10 flex flex-col justify-between p-6" tilt={true}>
+          <div>
+            <span className="text-[10px] font-space font-bold text-success tracking-widest uppercase bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 block w-max mb-4">
+              PRAYERS MATRIX
+            </span>
+            <h4 className="font-space text-base font-bold text-white mb-4">5 Daily Prayers (+10 XP each)</h4>
+            
+            <div className="grid grid-cols-5 gap-2">
+              {['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'].map((p) => {
+                const completed = todayHistory?.prayers?.[p] || false;
+                return (
+                  <button
+                    key={p}
+                    onClick={() => {
+                      confetti({ particleCount: 30, spread: 30, colors: ['#22C55E', '#FFFFFF'] });
+                      toggleTodayPrayer(p);
+                    }}
+                    className={`h-16 rounded-xl flex flex-col items-center justify-center border font-space text-[10px] font-bold tracking-wider uppercase transition-all duration-300 cursor-pointer ${
+                      completed
+                        ? 'bg-emerald-500/10 border-emerald-500/30 text-success shadow-[0_0_15px_rgba(34,197,94,0.3)]'
+                        : 'bg-white/5 border-white/5 text-white/50 hover:bg-white/10'
+                    }`}
+                  >
+                    <span className="text-xs mb-1">🕌</span>
+                    {p}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div className="mt-6 pt-4 border-t border-white/5 text-left">
+            <span className="text-[10px] text-white/40 font-space uppercase">Status: </span>
+            <span className="text-xs text-success font-space font-bold">
+              {Object.values(todayHistory?.prayers || {}).filter(Boolean).length} / 5 Done
+            </span>
+          </div>
+        </GlassCard>
+
+        {/* Grooming Checklist Card */}
+        <GlassCard className="border-[#FF8A00]/10 flex flex-col justify-between p-6" tilt={true}>
+          <div>
+            <span className="text-[10px] font-space font-bold text-[#FF8A00] tracking-widest uppercase bg-[#FF8A00]/10 px-3 py-1 rounded-full border border-[#FF8A00]/20 block w-max mb-4">
+              GROOMING SYSTEM
+            </span>
+            <h4 className="font-space text-base font-bold text-white mb-4">Daily Hygiene Rituals (+25 XP)</h4>
+            
+            <div className="flex flex-col gap-2.5">
+              {[
+                { key: 'brushAM', label: 'Morning Brush 🪥' },
+                { key: 'brushPM', label: 'Night Brush 🪥' },
+                { key: 'skincare', label: 'Skincare Routine 🧴' },
+                { key: 'shower', label: 'Refresh Shower 🚿' },
+                { key: 'floss', label: 'Dental Floss 🧵' }
+              ].map((g) => {
+                const completed = todayHistory?.grooming?.[g.key] || false;
+                return (
+                  <button
+                    key={g.key}
+                    onClick={() => toggleTodayGrooming(g.key)}
+                    className={`w-full text-left p-3 rounded-xl border flex items-center justify-between text-xs font-medium transition-all duration-300 cursor-pointer ${
+                      completed
+                        ? 'bg-[#FF8A00]/10 border-[#FF8A00]/20 text-[#FF8A00] line-through opacity-70'
+                        : 'bg-white/5 border-white/5 text-white/80 hover:bg-white/10'
+                    }`}
+                  >
+                    <span>{g.label}</span>
+                    <div className={`w-4 h-4 rounded border flex items-center justify-center text-[10px] ${
+                      completed ? 'border-[#FF8A00] bg-[#FF8A00] text-black' : 'border-white/20'
+                    }`}>
+                      {completed && '✓'}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div className="mt-6 pt-4 border-t border-white/5 text-left">
+            <span className="text-[10px] text-white/40 font-space uppercase">Progress: </span>
+            <span className="text-xs text-[#FF8A00] font-space font-bold">
+              {Object.values(todayHistory?.grooming || {}).filter(Boolean).length} / 5 Done
+            </span>
+          </div>
+        </GlassCard>
+
+        {/* YouTube Video Task Card */}
+        <GlassCard className="border-red-500/10 flex flex-col justify-between p-6" tilt={true}>
+          <div>
+            <span className="text-[10px] font-space font-bold text-red-400 tracking-widest uppercase bg-red-500/10 px-3 py-1 rounded-full border border-red-500/20 block w-max mb-4">
+              YOUTUBE STUDY
+            </span>
+            <h4 className="font-space text-base font-bold text-white mb-4">Daily Video Task (+30 XP)</h4>
+
+            <div className="flex flex-col gap-4">
+              <div>
+                <label className="block text-[9px] font-space text-white/40 uppercase mb-1.5">Educational Video Title</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Next.js Architecture / Physics video"
+                  value={ytTitle}
+                  onChange={(e) => setYtTitle(e.target.value)}
+                  onBlur={() => updateTodayYoutube(ytTitle, todayHistory?.youtube?.completed || false)}
+                  className="w-full bg-[#121A2C]/80 border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-red-400"
+                />
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    const nextComp = !(todayHistory?.youtube?.completed || false);
+                    if (nextComp) {
+                      confetti({ particleCount: 50, spread: 40, colors: ['#EF4444', '#FFFFFF'] });
+                    }
+                    updateTodayYoutube(ytTitle, nextComp);
+                  }}
+                  className={`flex-1 py-3 rounded-xl font-space font-bold text-xs border transition-all duration-300 cursor-pointer ${
+                    todayHistory?.youtube?.completed
+                      ? 'bg-red-500/20 border-red-500/30 text-red-400 shadow-[0_0_15px_rgba(239,68,68,0.2)]'
+                      : 'bg-white/5 border-white/5 text-white/70 hover:bg-white/10'
+                  }`}
+                >
+                  {todayHistory?.youtube?.completed ? '✓ VIDEO COMPLETED' : 'MARK VIDEO DONE'}
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="mt-6 pt-4 border-t border-white/5 text-left">
+            <span className="text-[10px] text-white/40 font-space uppercase">Target: </span>
+            <span className="text-xs text-red-400 font-space font-bold">1 Video Logged Daily</span>
           </div>
         </GlassCard>
       </div>

@@ -76,6 +76,24 @@ const DailyHistorySchema = new mongoose.Schema({
     onePlusActivity: { type: String, default: null },
     completed: { type: Boolean, default: false }
   },
+  youtube: {
+    title: { type: String, default: "" },
+    completed: { type: Boolean, default: false }
+  },
+  grooming: {
+    brushAM: { type: Boolean, default: false },
+    brushPM: { type: Boolean, default: false },
+    skincare: { type: Boolean, default: false },
+    shower: { type: Boolean, default: false },
+    floss: { type: Boolean, default: false }
+  },
+  prayers: {
+    fajr: { type: Boolean, default: false },
+    dhuhr: { type: Boolean, default: false },
+    asr: { type: Boolean, default: false },
+    maghrib: { type: Boolean, default: false },
+    isha: { type: Boolean, default: false }
+  },
   xpGained: { type: Number, default: 0 }
 });
 

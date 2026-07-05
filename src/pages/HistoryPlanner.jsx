@@ -49,6 +49,21 @@ export default function HistoryPlanner() {
   const [habitOnePlus, setHabitOnePlus] = useState('');
   const [habitCompleted, setHabitCompleted] = useState(false);
 
+  const [ytTitle, setYtTitle] = useState('');
+  const [ytCompleted, setYtCompleted] = useState(false);
+
+  const [groomBrushAM, setGroomBrushAM] = useState(false);
+  const [groomBrushPM, setGroomBrushPM] = useState(false);
+  const [groomSkincare, setGroomSkincare] = useState(false);
+  const [groomShower, setGroomShower] = useState(false);
+  const [groomFloss, setGroomFloss] = useState(false);
+
+  const [prayFajr, setPrayFajr] = useState(false);
+  const [prayDhuhr, setPrayDhuhr] = useState(false);
+  const [prayAsr, setPrayAsr] = useState(false);
+  const [prayMaghrib, setPrayMaghrib] = useState(false);
+  const [prayIsha, setPrayIsha] = useState(false);
+
   // Fetch all history list on mount
   const fetchHistoryList = async () => {
     try {
@@ -97,6 +112,21 @@ export default function HistoryPlanner() {
             setHabitSurah(record.habits?.surah || '');
             setHabitOnePlus(record.habits?.onePlusActivity || '');
             setHabitCompleted(record.habits?.completed || false);
+
+            setYtTitle(record.youtube?.title || '');
+            setYtCompleted(record.youtube?.completed || false);
+
+            setGroomBrushAM(record.grooming?.brushAM || false);
+            setGroomBrushPM(record.grooming?.brushPM || false);
+            setGroomSkincare(record.grooming?.skincare || false);
+            setGroomShower(record.grooming?.shower || false);
+            setGroomFloss(record.grooming?.floss || false);
+
+            setPrayFajr(record.prayers?.fajr || false);
+            setPrayDhuhr(record.prayers?.dhuhr || false);
+            setPrayAsr(record.prayers?.asr || false);
+            setPrayMaghrib(record.prayers?.maghrib || false);
+            setPrayIsha(record.prayers?.isha || false);
           } else {
             // Reset to empty
             setSportMuscle('');
@@ -114,6 +144,21 @@ export default function HistoryPlanner() {
             setHabitSurah('');
             setHabitOnePlus('');
             setHabitCompleted(false);
+
+            setYtTitle('');
+            setYtCompleted(false);
+
+            setGroomBrushAM(false);
+            setGroomBrushPM(false);
+            setGroomSkincare(false);
+            setGroomShower(false);
+            setGroomFloss(false);
+
+            setPrayFajr(false);
+            setPrayDhuhr(false);
+            setPrayAsr(false);
+            setPrayMaghrib(false);
+            setPrayIsha(false);
           }
         }
       } catch (err) {
@@ -151,6 +196,24 @@ export default function HistoryPlanner() {
         surah: habitSurah || null,
         onePlusActivity: habitOnePlus || null,
         completed: habitCompleted
+      },
+      youtube: {
+        title: ytTitle || "",
+        completed: ytCompleted
+      },
+      grooming: {
+        brushAM: groomBrushAM,
+        brushPM: groomBrushPM,
+        skincare: groomSkincare,
+        shower: groomShower,
+        floss: groomFloss
+      },
+      prayers: {
+        fajr: prayFajr,
+        dhuhr: prayDhuhr,
+        asr: prayAsr,
+        maghrib: prayMaghrib,
+        isha: prayIsha
       },
       xpGained: 0
     };
@@ -458,6 +521,101 @@ export default function HistoryPlanner() {
                   </div>
                 </div>
               </div>
+
+              {/* Separator */}
+              <div className="border-t border-white/5 my-2 col-span-1 md:col-span-2" />
+
+              {/* Prayers Editor */}
+              <div className="p-4 rounded-xl border border-emerald-500/10 bg-[#121A2C]/20 flex flex-col justify-between">
+                <div>
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-[10px] font-space font-bold text-success tracking-widest uppercase bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 flex items-center gap-1">
+                      🕌 PRAYERS
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-5 gap-1.5">
+                    {[
+                      { key: 'fajr', state: prayFajr, setter: setPrayFajr },
+                      { key: 'dhuhr', state: prayDhuhr, setter: setPrayDhuhr },
+                      { key: 'asr', state: prayAsr, setter: setPrayAsr },
+                      { key: 'maghrib', state: prayMaghrib, setter: setPrayMaghrib },
+                      { key: 'isha', state: prayIsha, setter: setPrayIsha }
+                    ].map(p => (
+                      <button
+                        key={p.key}
+                        onClick={() => p.setter(!p.state)}
+                        className={`py-2 rounded-lg border font-space text-[9px] font-bold tracking-wider uppercase transition-all duration-300 cursor-pointer ${
+                          p.state
+                            ? 'bg-emerald-500/10 border-emerald-500/30 text-success shadow-[0_0_10px_rgba(34,197,94,0.15)]'
+                            : 'bg-white/5 border-white/5 text-white/50 hover:bg-white/10'
+                        }`}
+                      >
+                        {p.key}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Grooming Editor */}
+              <div className="p-4 rounded-xl border border-[#FF8A00]/10 bg-[#121A2C]/20 flex flex-col justify-between">
+                <div>
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-[10px] font-space font-bold text-[#FF8A00] tracking-widest uppercase bg-[#FF8A00]/10 px-2 py-0.5 rounded border border-[#FF8A00]/20 flex items-center gap-1">
+                      🪥 GROOMING
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    {[
+                      { key: 'brushAM', label: 'Morning Brush', state: groomBrushAM, setter: setGroomBrushAM },
+                      { key: 'brushPM', label: 'Night Brush', state: groomBrushPM, setter: setGroomBrushPM },
+                      { key: 'skincare', label: 'Skincare', state: groomSkincare, setter: setGroomSkincare },
+                      { key: 'shower', label: 'Shower', state: groomShower, setter: setGroomShower },
+                      { key: 'floss', label: 'Floss', state: groomFloss, setter: setGroomFloss }
+                    ].map(g => (
+                      <label key={g.key} className="flex items-center justify-between text-[11px] text-white/70 cursor-pointer hover:text-white transition-all">
+                        <span>{g.label}</span>
+                        <input
+                          type="checkbox"
+                          checked={g.state}
+                          onChange={(e) => g.setter(e.target.checked)}
+                          className="w-3.5 h-3.5 accent-[#FF8A00] cursor-pointer"
+                        />
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* YouTube Editor */}
+              <div className="p-4 rounded-xl border border-red-500/10 bg-[#121A2C]/20 flex flex-col justify-between col-span-1 md:col-span-2">
+                <div>
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-[10px] font-space font-bold text-red-400 tracking-widest uppercase bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20 flex items-center gap-1">
+                      🎥 YOUTUBE STUDY
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={ytCompleted}
+                      onChange={(e) => setYtCompleted(e.target.checked)}
+                      className="w-4 h-4 accent-red-500 cursor-pointer"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <div>
+                      <label className="block text-[9px] font-space text-white/40 uppercase mb-1">Video Title Logged</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Next.js Under The Hood"
+                        value={ytTitle}
+                        onChange={(e) => setYtTitle(e.target.value)}
+                        className="w-full bg-[#121A2C]/80 border border-white/5 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-red-400"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </GlassCard>
         </div>

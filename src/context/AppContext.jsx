@@ -67,6 +67,7 @@ export const AppProvider = ({ children }) => {
   const [learningSchedule, setLearningSchedule] = useState(DEFAULT_LEARNING_SCHEDULE);
   const [habitsSchedule, setHabitsSchedule] = useState(DEFAULT_HABITS_SCHEDULE);
   const [userStats, setUserStats] = useState(DEFAULT_USER_STATS);
+  const [todayHistory, setTodayHistory] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [levelUpData, setLevelUpData] = useState(null);
@@ -102,7 +103,8 @@ export const AppProvider = ({ children }) => {
           fetchResource(API_BASE + '/api/watchlist', setWatchlist, 'watchlist'),
           fetchResource(API_BASE + '/api/learning', setLearningSchedule, 'learning'),
           fetchResource(API_BASE + '/api/stats', setUserStats, 'stats'),
-          fetchResource(API_BASE + '/api/habits', setHabitsSchedule, 'habits')
+          fetchResource(API_BASE + '/api/habits', setHabitsSchedule, 'habits'),
+          fetchResource(API_BASE + '/api/history/' + getLocalDateString(), setTodayHistory, 'todayHistory')
         ]);
       } catch (err) {
         console.error("Global startup fetching error:", err);
@@ -118,9 +120,114 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     if (loading) return;
 
-    const runDailyAndWeeklyChecks = async () => {
+    const initializeTodayHistory = async (dateStr) => {
+    const todayDayName = getDayNameOfDate(dateStr);
+    const sport = sportSchedule[todayDayName] || { muscle: 'Rest', name: 'Stretching', completed: false };
+    const ent = entertainmentSchedule[todayDayName];
+    const learn = learningSchedule[todayDayName];
+    const habit = habitsSchedule[todayDayName];
+
+    const payload = {
+      dayName: todayDayName,
+      sport: {
+        muscle: sport.muscle,
+        name: sport.name,
+        completed: sport.completed
+      },
+      entertainment: ent ? {
+        title: ent.title,
+        type: ent.type,
+        genre: ent.genre,
+        completed: ent.completed
+      } : { title: null, type: 'movie', genre: null, completed: false },
+      learning: learn ? {
+        subject: learn.subject,
+        objective: learn.objective,
+        hours: learn.hours,
+        minutes: learn.minutes,
+        completed: learn.completed
+      } : { subject: null, objective: null, hours: 0, minutes: 0, completed: false },
+      habits: habit ? {
+        surah: habit.surah,
+        onePlusActivity: habit.onePlusActivity,
+        completed: habit.completed
+      } : { surah: null, onePlusActivity: null, completed: false },
+      youtube: { title: "", completed: false },
+      grooming: { brushAM: false, brushPM: false, skincare: false, shower: false, floss: false },
+      prayers: { fajr: false, dhuhr: false, asr: false, maghrib: false, isha: false },
+      xpGained: 0
+    };
+
+    try {
+      const res = await fetch(`${API_BASE}/api/history/${dateStr}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setTodayHistory(data);
+        console.log(`Initialized today's history record for ${dateStr}`);
+      }
+    } catch (err) {
+      print("Failed to initialize today's history:", err)
+    }
+  };
+
+  const syncTodayHistoryField = async (field, subValue) => {
+    // If todayHistory is not loaded yet, fetch it or do nothing
+    let currentHistory = todayHistory;
+    const todayDateStr = getLocalDateString();
+    if (!currentHistory) {
+      try {
+        const res = await fetch(`${API_BASE}/api/history/${todayDateStr}`);
+        if (res.ok) {
+          currentHistory = await res.json();
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    if (!currentHistory) return;
+
+    const updated = {
+      ...currentHistory,
+      [field]: subValue
+    };
+    setTodayHistory(updated);
+
+    try {
+      await fetch(`${API_BASE}/api/history/${todayDateStr}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated)
+      });
+    } catch (err) {
+      console.error("Failed to auto-sync today's history:", err);
+    }
+  };
+
+  const runDailyAndWeeklyChecks = async () => {
       const todayDateStr = getLocalDateString();
       const lastActive = userStats.lastActiveDate;
+
+      // Ensure today's history record exists
+      try {
+        const histCheck = await fetch(`${API_BASE}/api/history/${todayDateStr}`);
+        let recordExists = false;
+        if (histCheck.ok) {
+          const record = await histCheck.json();
+          if (record) {
+            setTodayHistory(record);
+            recordExists = true;
+          }
+        }
+        if (!recordExists) {
+          await initializeTodayHistory(todayDateStr);
+        }
+      } catch (err) {
+        console.error("Failed to load/initialize today's history:", err);
+      }
 
       if (lastActive && lastActive !== todayDateStr) {
         console.log(`Detecting new day transition from ${lastActive} to ${todayDateStr}`);
@@ -391,6 +498,10 @@ export const AppProvider = ({ children }) => {
     } catch (err) {
       console.error(err);
     }
+    const todayDayName = getDayNameOfDate(getLocalDateString());
+    if (day === todayDayName) {
+      syncTodayHistoryField('sport', { muscle, name, completed: updatedWorkout.completed });
+    }
   };
 
   const toggleSportWorkoutCompleted = async (day) => {
@@ -422,6 +533,10 @@ export const AppProvider = ({ children }) => {
     } catch (err) {
       console.error(err);
     }
+    const todayDayName = getDayNameOfDate(getLocalDateString());
+    if (day === todayDayName) {
+      syncTodayHistoryField('sport', { muscle, name, completed: updatedWorkout.completed });
+    }
   };
 
   // Entertainment Planner Actions
@@ -439,6 +554,10 @@ export const AppProvider = ({ children }) => {
       });
     } catch (err) {
       console.error(err);
+    }
+    const todayDayName = getDayNameOfDate(getLocalDateString());
+    if (day === todayDayName) {
+      syncTodayHistoryField('entertainment', data ? { title: data.title, type: data.type, genre: data.genre, completed: data.completed } : { title: null, type: 'movie', genre: null, completed: false });
     }
   };
 
@@ -478,6 +597,10 @@ export const AppProvider = ({ children }) => {
       });
     } catch (err) {
       console.error(err);
+    }
+    const todayDayName = getDayNameOfDate(getLocalDateString());
+    if (day === todayDayName) {
+      syncTodayHistoryField('entertainment', { title: updatedItem.title, type: updatedItem.type, genre: updatedItem.genre, completed: nextCompleted });
     }
   };
 
@@ -524,6 +647,10 @@ export const AppProvider = ({ children }) => {
     } catch (err) {
       console.error(err);
     }
+    const todayDayName = getDayNameOfDate(getLocalDateString());
+    if (day === todayDayName) {
+      syncTodayHistoryField('learning', data ? { subject: data.subject, objective: data.objective, hours: data.hours, minutes: data.minutes, completed: data.completed } : { subject: null, objective: null, hours: 0, minutes: 0, completed: false });
+    }
   };
 
   const toggleLearningCompleted = async (day) => {
@@ -549,6 +676,10 @@ export const AppProvider = ({ children }) => {
       });
     } catch (err) {
       console.error(err);
+    }
+    const todayDayName = getDayNameOfDate(getLocalDateString());
+    if (day === todayDayName) {
+      syncTodayHistoryField('learning', { subject: updatedItem.subject, objective: updatedItem.objective, hours: updatedItem.hours, minutes: updatedItem.minutes, completed: nextCompleted });
     }
   };
 
@@ -582,9 +713,88 @@ export const AppProvider = ({ children }) => {
     } catch (err) {
       console.error(err);
     }
+    const todayDayName = getDayNameOfDate(getLocalDateString());
+    if (day === todayDayName) {
+      syncTodayHistoryField('learning', { subject: updatedItem.subject, objective: updatedItem.objective, hours: updatedItem.hours, minutes: updatedItem.minutes, completed: nextCompleted });
+    }
   };
 
   // Quran & Habits Actions
+  const toggleTodayPrayer = async (prayerKey) => {
+    if (!todayHistory) return;
+    const nextVal = !todayHistory.prayers?.[prayerKey];
+    if (nextVal) {
+      setTimeout(() => addXP(10), 50);
+    }
+    const updated = {
+      ...todayHistory,
+      prayers: {
+        ...todayHistory.prayers,
+        [prayerKey]: nextVal
+      }
+    };
+    setTodayHistory(updated);
+    try {
+      await fetch(`${API_BASE}/api/history/${getLocalDateString()}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated)
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const toggleTodayGrooming = async (groomingKey) => {
+    if (!todayHistory) return;
+    const nextVal = !todayHistory.grooming?.[groomingKey];
+    const prospectiveGrooming = {
+      ...todayHistory.grooming,
+      [groomingKey]: nextVal
+    };
+    const allCompletedBefore = Object.values(todayHistory.grooming || {}).every(Boolean);
+    const allCompletedNow = Object.values(prospectiveGrooming).every(Boolean);
+    if (allCompletedNow && !allCompletedBefore) {
+      setTimeout(() => addXP(25), 50);
+    }
+    const updated = {
+      ...todayHistory,
+      grooming: prospectiveGrooming
+    };
+    setTodayHistory(updated);
+    try {
+      await fetch(`${API_BASE}/api/history/${getLocalDateString()}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated)
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const updateTodayYoutube = async (title, completed) => {
+    if (!todayHistory) return;
+    const nextCompleted = completed && !todayHistory.youtube?.completed;
+    if (nextCompleted) {
+      setTimeout(() => addXP(30), 50);
+    }
+    const updated = {
+      ...todayHistory,
+      youtube: { title, completed }
+    };
+    setTodayHistory(updated);
+    try {
+      await fetch(`${API_BASE}/api/history/${getLocalDateString()}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated)
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const updateHabitsWorkout = async (day, surah, onePlusActivity) => {
     const updatedHabit = { surah, onePlusActivity, completed: habitsSchedule[day]?.completed || false };
     setHabitsSchedule(prev => ({
@@ -600,6 +810,10 @@ export const AppProvider = ({ children }) => {
       });
     } catch (err) {
       console.error(err);
+    }
+    const todayDayName = getDayNameOfDate(getLocalDateString());
+    if (day === todayDayName) {
+      syncTodayHistoryField('habits', { surah, onePlusActivity, completed: updatedHabit.completed });
     }
   };
 
@@ -627,6 +841,10 @@ export const AppProvider = ({ children }) => {
       });
     } catch (err) {
       console.error(err);
+    }
+    const todayDayName = getDayNameOfDate(getLocalDateString());
+    if (day === todayDayName) {
+      syncTodayHistoryField('habits', { surah, onePlusActivity, completed: updatedHabit.completed });
     }
   };
 
@@ -696,6 +914,10 @@ export const AppProvider = ({ children }) => {
       setLevelUpData,
       recentAchievement,
       setRecentAchievement,
+      todayHistory,
+      toggleTodayPrayer,
+      toggleTodayGrooming,
+      updateTodayYoutube,
       loading
     }}>
       {children}

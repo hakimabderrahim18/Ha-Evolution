@@ -3,6 +3,9 @@ import { motion } from 'framer-motion';
 import { FiTrendingUp, FiAward, FiZap, FiCheck, FiArrowRight } from 'react-icons/fi';
 import { AppContext } from '../context/AppContext';
 import GlassCard from '../components/GlassCard';
+import PrayersMatrix from '../components/PrayersMatrix';
+import HygieneTracker from '../components/HygieneTracker';
+import { FiActivity, FiPlayCircle, FiBookOpen, FiCompass, FiYoutube } from 'react-icons/fi';
 import confetti from 'canvas-confetti';
 
 const QUOTES = [
@@ -365,24 +368,30 @@ export default function Dashboard() {
 
       {/* Today's 3D Action Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        
         {/* Fitness Card */}
-        <GlassCard className="border-accent/15 flex flex-col justify-between h-[220px]" tilt={true}>
-          <div>
-            <div className="flex justify-between items-start mb-4">
-              <span className="text-xs font-space font-bold text-accent tracking-widest uppercase bg-accent/10 px-3 py-1 rounded-full border border-accent/20">FITNESS</span>
-              {todayWorkout?.completed && <span className="text-success text-xs font-space font-bold flex items-center gap-1">✓ COMPLETED</span>}
+        <GlassCard className="border-accent/20 bg-gradient-to-br from-[#121A2C]/90 to-accent/5 hover:border-accent/40 shadow-[0_0_15px_rgba(124,77,255,0.05)] hover:shadow-[0_0_25px_rgba(124,77,255,0.25)] relative group flex flex-col justify-between h-[230px] transition-all duration-300" tilt={true}>
+          <div className="relative">
+            {/* Corner floating glowing icon */}
+            <div className="absolute -top-1 -right-1 text-white/5 group-hover:text-accent/15 transition-all duration-500 text-4xl pointer-events-none">
+              <FiActivity />
             </div>
-            <h4 className="font-space text-xl font-bold mb-1 text-white">{todayWorkout?.muscle || 'Rest Day'}</h4>
-            <p className="text-white/60 text-xs line-clamp-2">{todayWorkout?.name || 'Recovery routines and light stretching'}</p>
+            
+            <div className="flex justify-between items-start mb-4">
+              <span className="text-[9px] font-space font-bold text-accent tracking-widest uppercase bg-accent/10 px-2.5 py-0.5 rounded border border-accent/20">FITNESS</span>
+              {todayWorkout?.completed && <span className="text-success text-[10px] font-space font-bold flex items-center gap-1">✓ COMPLETED</span>}
+            </div>
+            <h4 className="font-space text-lg font-extrabold mb-1 text-white truncate">{todayWorkout?.muscle || 'Rest Day'}</h4>
+            <p className="text-white/50 text-xs line-clamp-2 leading-relaxed">{todayWorkout?.name || 'Recovery routines and light stretching'}</p>
           </div>
-          <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center">
-            <span className="text-[10px] text-white/40 font-space uppercase">Target: Workout</span>
+          <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center relative z-10">
+            <span className="text-[9px] text-white/30 font-space uppercase">Target: Workout</span>
             {todayWorkout?.completed ? (
               <span className="text-xs text-white/40 italic">Great job today!</span>
             ) : (
               <button
                 onClick={() => handleCompleteConfetti('sport', todayDayName)}
-                className="px-4 py-2 rounded-xl bg-accent text-white font-space font-bold text-xs hover:shadow-[0_0_15px_rgba(124,77,255,0.4)] active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
+                className="px-3.5 py-1.5 rounded-xl bg-accent text-white font-space font-bold text-[11px] hover:shadow-[0_0_15px_rgba(124,77,255,0.4)] active:scale-95 transition-all cursor-pointer flex items-center gap-1"
               >
                 <FiCheck className="w-3.5 h-3.5" /> MARK DONE
               </button>
@@ -391,36 +400,41 @@ export default function Dashboard() {
         </GlassCard>
 
         {/* Entertainment Card */}
-        <GlassCard className="border-emerald-500/15 flex flex-col justify-between h-[220px]" tilt={true}>
-          <div>
+        <GlassCard className="border-emerald-500/20 bg-gradient-to-br from-[#121A2C]/90 to-emerald-500/5 hover:border-emerald-500/40 shadow-[0_0_15px_rgba(34,197,94,0.05)] hover:shadow-[0_0_25px_rgba(34,197,94,0.25)] relative group flex flex-col justify-between h-[230px] transition-all duration-300" tilt={true}>
+          <div className="relative">
+            {/* Corner floating glowing icon */}
+            <div className="absolute -top-1 -right-1 text-white/5 group-hover:text-emerald-400/15 transition-all duration-500 text-4xl pointer-events-none">
+              <FiPlayCircle />
+            </div>
+
             <div className="flex justify-between items-start mb-4">
-              <span className="text-xs font-space font-bold text-success tracking-widest uppercase bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">ENTERTAINMENT</span>
-              {todayPlay?.completed && <span className="text-success text-xs font-space font-bold flex items-center gap-1">✓ COMPLETED</span>}
+              <span className="text-[9px] font-space font-bold text-success tracking-widest uppercase bg-emerald-500/10 px-2.5 py-0.5 rounded border border-emerald-500/20">PLAY</span>
+              {todayPlay?.completed && <span className="text-success text-[10px] font-space font-bold flex items-center gap-1">✓ COMPLETED</span>}
             </div>
             {todayPlay ? (
               <>
-                <h4 className="font-space text-xl font-bold mb-1 text-white truncate">{todayPlay.title}</h4>
-                <p className="text-white/60 text-xs">
-                  Type: <span className="capitalize">{todayPlay.type}</span> | Genre: {todayPlay.genre}
+                <h4 className="font-space text-lg font-extrabold mb-1 text-white truncate">{todayPlay.title}</h4>
+                <p className="text-white/50 text-xs leading-relaxed truncate">
+                  Type: <span className="capitalize text-emerald-400 font-bold">{todayPlay.type}</span> | {todayPlay.genre}
                 </p>
-                <p className="text-white/60 text-xs mt-1">Duration: {todayPlay.duration} min | Rating: {'★'.repeat(todayPlay.rating)}</p>
+                <p className="text-white/40 text-[10px] mt-1 font-space">Duration: {todayPlay.duration} min | Rating: {'★'.repeat(todayPlay.rating)}</p>
               </>
             ) : (
               <>
-                <h4 className="font-space text-xl font-bold mb-1 text-white">Unscheduled</h4>
-                <p className="text-white/60 text-xs">No gaming or movie session set for today. Go to the Play tab to add one!</p>
+                <h4 className="font-space text-lg font-extrabold mb-1 text-white">Unscheduled</h4>
+                <p className="text-white/50 text-xs leading-relaxed line-clamp-2">No gaming/movie session set. Go to Play to add one!</p>
               </>
             )}
           </div>
-          <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center">
-            <span className="text-[10px] text-white/40 font-space uppercase">Target: Balance</span>
+          <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center relative z-10">
+            <span className="text-[9px] text-white/30 font-space uppercase">Target: Balance</span>
             {todayPlay ? (
               todayPlay.completed ? (
                 <span className="text-xs text-white/40 italic">Slot completed!</span>
               ) : (
                 <button
                   onClick={() => handleCompleteConfetti('play', todayDayName)}
-                  className="px-4 py-2 rounded-xl bg-success text-white font-space font-bold text-xs hover:shadow-[0_0_15px_rgba(34,197,94,0.4)] active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
+                  className="px-3.5 py-1.5 rounded-xl bg-success text-white font-space font-bold text-[11px] hover:shadow-[0_0_15px_rgba(34,197,94,0.4)] active:scale-95 transition-all cursor-pointer flex items-center gap-1"
                 >
                   <FiCheck className="w-3.5 h-3.5" /> MARK DONE
                 </button>
@@ -432,36 +446,41 @@ export default function Dashboard() {
         </GlassCard>
 
         {/* Learning Card */}
-        <GlassCard className="border-primary/15 flex flex-col justify-between h-[220px]" tilt={true}>
-          <div>
+        <GlassCard className="border-primary/20 bg-gradient-to-br from-[#121A2C]/90 to-primary/5 hover:border-primary/40 shadow-[0_0_15px_rgba(255,213,74,0.05)] hover:shadow-[0_0_25px_rgba(255,213,74,0.25)] relative group flex flex-col justify-between h-[230px] transition-all duration-300" tilt={true}>
+          <div className="relative">
+            {/* Corner floating glowing icon */}
+            <div className="absolute -top-1 -right-1 text-white/5 group-hover:text-primary/15 transition-all duration-500 text-4xl pointer-events-none">
+              <FiBookOpen />
+            </div>
+
             <div className="flex justify-between items-start mb-4">
-              <span className="text-xs font-space font-bold text-primary tracking-widest uppercase bg-primary/10 px-3 py-1 rounded-full border border-primary/20">LEARNING</span>
-              {todayLearn?.completed && <span className="text-success text-xs font-space font-bold flex items-center gap-1">✓ COMPLETED</span>}
+              <span className="text-[9px] font-space font-bold text-primary tracking-widest uppercase bg-primary/10 px-2.5 py-0.5 rounded border border-primary/20">LEARNING</span>
+              {todayLearn?.completed && <span className="text-success text-[10px] font-space font-bold flex items-center gap-1">✓ COMPLETED</span>}
             </div>
             {todayLearn ? (
               <>
-                <h4 className="font-space text-xl font-bold mb-1 text-white truncate">{todayLearn.subject}</h4>
-                <p className="text-white/60 text-xs line-clamp-2">Objective: {todayLearn.objective}</p>
+                <h4 className="font-space text-lg font-extrabold mb-1 text-white truncate">{todayLearn.subject}</h4>
+                <p className="text-white/50 text-xs line-clamp-2 leading-relaxed">Objective: {todayLearn.objective}</p>
                 {todayLearn.hours > 0 && (
-                  <p className="text-primary text-xs font-bold font-space mt-1">Logged: {todayLearn.hours} hours</p>
+                  <p className="text-primary text-[10px] font-bold font-space mt-1 bg-primary/10 px-2 py-0.5 rounded w-max border border-primary/20">LOGGED: {todayLearn.hours}h</p>
                 )}
               </>
             ) : (
               <>
-                <h4 className="font-space text-xl font-bold mb-1 text-white">No Class Set</h4>
-                <p className="text-white/60 text-xs">No learning routine set for today. Open the Learning tab to configure a subject!</p>
+                <h4 className="font-space text-lg font-extrabold mb-1 text-white">No Class Set</h4>
+                <p className="text-white/50 text-xs leading-relaxed line-clamp-2">No learning routine set. Open the Learn tab to schedule.</p>
               </>
             )}
           </div>
-          <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center">
-            <span className="text-[10px] text-white/40 font-space uppercase">Target: Growth</span>
+          <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center relative z-10">
+            <span className="text-[9px] text-white/30 font-space uppercase">Target: Growth</span>
             {todayLearn ? (
               todayLearn.completed ? (
                 <span className="text-xs text-white/40 italic">Knowledge acquired!</span>
               ) : (
                 <button
                   onClick={() => handleCompleteConfetti('learn', todayDayName)}
-                  className="px-4 py-2 rounded-xl bg-primary text-[#0B1220] font-space font-bold text-xs hover:shadow-[0_0_15px_rgba(255,213,74,0.4)] active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
+                  className="px-3.5 py-1.5 rounded-xl bg-primary text-[#0B1220] font-space font-bold text-[11px] hover:shadow-[0_0_15px_rgba(255,213,74,0.4)] active:scale-95 transition-all cursor-pointer flex items-center gap-1"
                 >
                   <FiCheck className="w-3.5 h-3.5" /> MARK DONE
                 </button>
@@ -473,33 +492,38 @@ export default function Dashboard() {
         </GlassCard>
 
         {/* Habits Card */}
-        <GlassCard className="border-cyan-500/15 flex flex-col justify-between h-[220px]" tilt={true}>
-          <div>
+        <GlassCard className="border-cyan-500/20 bg-gradient-to-br from-[#121A2C]/90 to-cyan-400/5 hover:border-cyan-400/40 shadow-[0_0_15px_rgba(0,229,255,0.05)] hover:shadow-[0_0_25px_rgba(0,229,255,0.25)] relative group flex flex-col justify-between h-[230px] transition-all duration-300" tilt={true}>
+          <div className="relative">
+            {/* Corner floating glowing icon */}
+            <div className="absolute -top-1 -right-1 text-white/5 group-hover:text-cyan-400/15 transition-all duration-500 text-4xl pointer-events-none">
+              <FiCompass />
+            </div>
+
             <div className="flex justify-between items-start mb-4">
-              <span className="text-xs font-space font-bold text-cyan-400 tracking-widest uppercase bg-cyan-400/10 px-3 py-1 rounded-full border border-cyan-400/20">HABITS</span>
-              {todayHabit?.completed && <span className="text-success text-xs font-space font-bold flex items-center gap-1">✓ COMPLETED</span>}
+              <span className="text-[9px] font-space font-bold text-cyan-400 tracking-widest uppercase bg-cyan-400/10 px-2.5 py-0.5 rounded border border-cyan-400/20">HABITS</span>
+              {todayHabit?.completed && <span className="text-success text-[10px] font-space font-bold flex items-center gap-1">✓ COMPLETED</span>}
             </div>
             {todayHabit ? (
               <>
-                <h4 className="font-space text-lg font-bold mb-1 text-white truncate">{todayHabit.surah}</h4>
-                <p className="text-white/60 text-xs line-clamp-2">OnePlus: {todayHabit.onePlusActivity}</p>
+                <h4 className="font-space text-base font-extrabold mb-1 text-white truncate">{todayHabit.surah}</h4>
+                <p className="text-white/50 text-xs line-clamp-2 leading-relaxed">OnePlus: {todayHabit.onePlusActivity}</p>
               </>
             ) : (
               <>
-                <h4 className="font-space text-xl font-bold mb-1 text-white">Unscheduled</h4>
-                <p className="text-white/60 text-xs">No daily habits schedule loaded. Head to the Habits tab to assign!</p>
+                <h4 className="font-space text-lg font-extrabold mb-1 text-white">Unscheduled</h4>
+                <p className="text-white/50 text-xs leading-relaxed line-clamp-2">No daily habits schedule loaded. Go to Habits tab!</p>
               </>
             )}
           </div>
-          <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center">
-            <span className="text-[10px] text-white/40 font-space uppercase">Target: Habits</span>
+          <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center relative z-10">
+            <span className="text-[9px] text-white/30 font-space uppercase">Target: Habits</span>
             {todayHabit ? (
               todayHabit.completed ? (
                 <span className="text-xs text-white/40 italic">Daily habits complete!</span>
               ) : (
                 <button
                   onClick={() => handleCompleteConfetti('habits', todayDayName)}
-                  className="px-4 py-2 rounded-xl bg-cyan-400 text-[#0B1220] font-space font-bold text-xs hover:shadow-[0_0_15px_rgba(0,229,255,0.4)] active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
+                  className="px-3.5 py-1.5 rounded-xl bg-cyan-400 text-[#0B1220] font-space font-bold text-[11px] hover:shadow-[0_0_15px_rgba(0,229,255,0.4)] active:scale-95 transition-all cursor-pointer flex items-center gap-1"
                 >
                   <FiCheck className="w-3.5 h-3.5" /> MARK DONE
                 </button>
@@ -511,33 +535,38 @@ export default function Dashboard() {
         </GlassCard>
 
         {/* Youtube Card */}
-        <GlassCard className="border-red-500/15 flex flex-col justify-between h-[220px]" tilt={true}>
-          <div>
+        <GlassCard className="border-red-500/20 bg-gradient-to-br from-[#121A2C]/90 to-red-500/5 hover:border-red-500/40 shadow-[0_0_15px_rgba(239,68,68,0.05)] hover:shadow-[0_0_25px_rgba(239,68,68,0.25)] relative group flex flex-col justify-between h-[230px] transition-all duration-300" tilt={true}>
+          <div className="relative">
+            {/* Corner floating glowing icon */}
+            <div className="absolute -top-1 -right-1 text-white/5 group-hover:text-red-400/15 transition-all duration-500 text-4xl pointer-events-none">
+              <FiYoutube />
+            </div>
+
             <div className="flex justify-between items-start mb-4">
-              <span className="text-xs font-space font-bold text-red-400 tracking-widest uppercase bg-red-500/10 px-3 py-1 rounded-full border border-red-500/20">YOUTUBE</span>
-              {todayYoutube?.completed && <span className="text-success text-xs font-space font-bold flex items-center gap-1">✓ COMPLETED</span>}
+              <span className="text-[9px] font-space font-bold text-red-400 tracking-widest uppercase bg-red-500/10 px-2.5 py-0.5 rounded border border-red-500/20">YOUTUBE</span>
+              {todayYoutube?.completed && <span className="text-success text-[10px] font-space font-bold flex items-center gap-1">✓ COMPLETED</span>}
             </div>
             {todayYoutube && todayYoutube.title ? (
               <>
-                <h4 className="font-space text-lg font-bold mb-1 text-white truncate">{todayYoutube.title}</h4>
-                <p className="text-white/60 text-xs">Channel: <strong className="text-red-400">{todayYoutube.channel}</strong></p>
+                <h4 className="font-space text-lg font-extrabold mb-1 text-white truncate">{todayYoutube.title}</h4>
+                <p className="text-white/50 text-xs leading-relaxed">Channel: <strong className="text-red-400">{todayYoutube.channel}</strong></p>
               </>
             ) : (
               <>
-                <h4 className="font-space text-xl font-bold mb-1 text-white">Unscheduled</h4>
-                <p className="text-white/60 text-xs">No study video set for today. Head to the YouTube tab to schedule one!</p>
+                <h4 className="font-space text-lg font-extrabold mb-1 text-white">Unscheduled</h4>
+                <p className="text-white/50 text-xs leading-relaxed line-clamp-2">No study video set. Head to the YouTube tab to schedule.</p>
               </>
             )}
           </div>
-          <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center">
-            <span className="text-[10px] text-white/40 font-space uppercase">Target: Study</span>
+          <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center relative z-10">
+            <span className="text-[9px] text-white/30 font-space uppercase">Target: Study</span>
             {todayYoutube ? (
               todayYoutube.completed ? (
                 <span className="text-xs text-white/40 italic">Study log complete!</span>
               ) : (
                 <button
                   onClick={() => handleCompleteConfetti('youtube', todayDayName)}
-                  className="px-4 py-2 rounded-xl bg-red-500 text-white font-space font-bold text-xs hover:shadow-[0_0_15px_rgba(239,68,68,0.4)] active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
+                  className="px-3.5 py-1.5 rounded-xl bg-red-500 text-white font-space font-bold text-[11px] hover:shadow-[0_0_15px_rgba(239,68,68,0.4)] active:scale-95 transition-all cursor-pointer flex items-center gap-1"
                 >
                   <FiCheck className="w-3.5 h-3.5" /> MARK DONE
                 </button>
@@ -547,6 +576,17 @@ export default function Dashboard() {
             )}
           </div>
         </GlassCard>
+      </div>
+
+      {/* Daily Rituals Heading */}
+      <h3 className="font-space text-lg font-bold text-white uppercase tracking-wider mb-6 mt-12 flex items-center gap-2">
+        <FiZap className="text-success w-5 h-5 animate-pulse" /> Daily Rituals Quick Panel <span className="text-white/30 text-sm">({todayDayName})</span>
+      </h3>
+
+      {/* Daily Rituals Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+        <PrayersMatrix />
+        <HygieneTracker />
       </div>
     </motion.div>
   );

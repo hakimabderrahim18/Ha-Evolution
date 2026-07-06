@@ -155,29 +155,64 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Quote Banner */}
-      <GlassCard className="mb-10 py-4 px-6 border-primary/20 bg-gradient-to-r from-primary/5 via-accent/5 to-transparent relative" tilt={false}>
-        <div className="flex items-center gap-4">
-          <span className="text-2xl">💡</span>
-          <p className="font-space text-sm text-white/90 italic font-medium leading-relaxed">
-            "{quote}"
-          </p>
-        </div>
-      </GlassCard>
+      {/* Quote, XP, and Quests Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-12">
+        {/* Left 8 Columns: Quote Banner & XP Progression */}
+        <div className="lg:col-span-8 flex flex-col justify-between gap-6">
+          {/* Quote Banner */}
+          <GlassCard className="py-4 px-6 border-primary/20 bg-gradient-to-r from-primary/5 via-accent/5 to-transparent relative flex-1 flex items-center" tilt={false}>
+            <div className="flex items-center gap-4">
+              <span className="text-2xl">💡</span>
+              <p className="font-space text-sm text-white/90 italic font-medium leading-relaxed">
+                "{quote}"
+              </p>
+            </div>
+          </GlassCard>
 
-      {/* Level XP Progress Bar */}
-      <div className="mb-12">
-        <div className="flex justify-between items-end font-space text-xs mb-2">
-          <span className="text-white/60">XP PROGRESSION</span>
-          <span className="text-primary font-bold">{userStats.xp} / {nextLevelXp} XP ({xpPercentage}%)</span>
+          {/* Level XP Progress Bar */}
+          <div className="bg-[#121A2C]/20 border border-white/5 p-5 rounded-2xl">
+            <div className="flex justify-between items-end font-space text-xs mb-2">
+              <span className="text-white/60">XP PROGRESSION</span>
+              <span className="text-primary font-bold">{userStats.xp} / {nextLevelXp} XP ({xpPercentage}%)</span>
+            </div>
+            <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden border border-white/5 relative p-[1px]">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${xpPercentage}%` }}
+                transition={{ duration: 0.8, ease: 'easeOut' }}
+                className="h-full rounded-full bg-gradient-to-r from-accent via-primary to-[#FF8A00] shadow-[0_0_10px_rgba(124,77,255,0.4)]"
+              />
+            </div>
+          </div>
         </div>
-        <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden border border-white/5 relative p-[1px]">
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${xpPercentage}%` }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="h-full rounded-full bg-gradient-to-r from-accent via-primary to-[#FF8A00] shadow-[0_0_10px_rgba(124,77,255,0.4)]"
-          />
+
+        {/* Right 4 Columns: Mini Quests Detail Widget */}
+        <div className="lg:col-span-4">
+          <GlassCard className="border-primary/10 p-5 flex flex-col justify-between h-full bg-[#121A2C]/20 relative overflow-hidden" glow={true} glowColor="primary">
+            <div className="absolute top-2 right-2 text-white/5 text-4xl pointer-events-none"><FiFlag /></div>
+            <div>
+              <h3 className="font-space text-xs font-bold text-primary tracking-[2px] uppercase mb-3 flex items-center gap-1.5">
+                <FiFlag className="text-primary animate-pulse w-4 h-4" /> ACTIVE WEEKLY QUESTS
+              </h3>
+              {activeGoals.length > 0 ? (
+                <div className="flex flex-col gap-2.5 max-h-[140px] overflow-y-auto pr-1 custom-scrollbar">
+                  {activeGoals.map(goal => (
+                    <div key={goal._id} className="flex items-center gap-2.5 text-xs truncate">
+                      <span className={`w-2 h-2 rounded-full shrink-0 ${goal.completed ? 'bg-emerald-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]' : 'bg-primary animate-pulse shadow-[0_0_8px_rgba(255,213,74,0.4)]'}`} />
+                      <span className={`truncate font-medium ${goal.completed ? 'line-through text-white/30' : 'text-white/80'}`}>{goal.title}</span>
+                      <span className="text-[9px] text-primary/80 shrink-0 ml-auto font-space font-bold bg-primary/5 px-1.5 py-0.5 rounded border border-primary/10">+{goal.xpReward} XP</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-white/30 text-xs italic py-4">No active weekly quests set.</p>
+              )}
+            </div>
+            <div className="mt-4 pt-3 border-t border-white/5 flex justify-between items-center text-[10px] text-white/40 font-space uppercase shrink-0">
+              <span>Quest Progress: {activeGoals.filter(g => g.completed).length}/{activeGoals.length}</span>
+              <span className="text-primary font-bold bg-primary/10 px-2 py-0.5 rounded border border-primary/15">{activeGoals.length > 0 ? Math.round((activeGoals.filter(g => g.completed).length / activeGoals.length) * 100) : 0}%</span>
+            </div>
+          </GlassCard>
         </div>
       </div>
 

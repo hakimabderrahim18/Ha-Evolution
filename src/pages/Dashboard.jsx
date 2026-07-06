@@ -396,11 +396,12 @@ export default function Dashboard() {
             </div>
             <h4 className="font-space text-lg font-extrabold mb-1 text-white truncate">{todayWorkout?.muscle || 'Rest Day'}</h4>
             <p className="text-white/50 text-xs line-clamp-2 leading-relaxed">{todayWorkout?.name || 'Recovery routines and light stretching'}</p>
-            {activeGoals.filter(g => g.category === 'Fitness' && !g.completed).length > 0 && (
-              <div className="mt-2 text-[9px] text-accent font-bold font-space flex items-center gap-1 bg-accent/10 px-2 py-0.5 rounded border border-accent/20 w-max">
-                🎯 {activeGoals.filter(g => g.category === 'Fitness' && !g.completed).length} pending Fitness Quest
+            {activeGoals.filter(g => g.category === 'Fitness' && !g.completed).map(goal => (
+              <div key={goal._id} className="mt-2 text-[9px] text-accent font-bold font-space flex items-center gap-1 bg-accent/10 px-2 py-1 rounded-lg border border-accent/20 w-full truncate" title={goal.title}>
+                <span className="animate-pulse shrink-0">🎯</span>
+                <span className="truncate">{goal.title} (+{goal.xpReward} XP)</span>
               </div>
-            )}
+            ))}
           </div>
           <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center relative z-10">
             <span className="text-[9px] text-white/30 font-space uppercase">Target: Workout</span>
@@ -443,11 +444,12 @@ export default function Dashboard() {
                 <p className="text-white/50 text-xs leading-relaxed line-clamp-2">No gaming/movie session set. Go to Play to add one!</p>
               </>
             )}
-            {activeGoals.filter(g => g.category === 'Play' && !g.completed).length > 0 && (
-              <div className="mt-2 text-[9px] text-success font-bold font-space flex items-center gap-1 bg-success/10 px-2 py-0.5 rounded border border-success/20 w-max">
-                🎯 {activeGoals.filter(g => g.category === 'Play' && !g.completed).length} pending Play Quest
+            {activeGoals.filter(g => g.category === 'Play' && !g.completed).map(goal => (
+              <div key={goal._id} className="mt-2 text-[9px] text-success font-bold font-space flex items-center gap-1 bg-success/10 px-2 py-1 rounded-lg border border-success/20 w-full truncate" title={goal.title}>
+                <span className="animate-pulse shrink-0">🎯</span>
+                <span className="truncate">{goal.title} (+{goal.xpReward} XP)</span>
               </div>
-            )}
+            ))}
           </div>
           <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center relative z-10">
             <span className="text-[9px] text-white/30 font-space uppercase">Target: Balance</span>
@@ -494,11 +496,12 @@ export default function Dashboard() {
                 <p className="text-white/50 text-xs leading-relaxed line-clamp-2">No learning routine set. Open the Learn tab to schedule.</p>
               </>
             )}
-            {activeGoals.filter(g => g.category === 'Learning' && !g.completed).length > 0 && (
-              <div className="mt-2 text-[9px] text-primary font-bold font-space flex items-center gap-1 bg-primary/10 px-2 py-0.5 rounded border border-primary/20 w-max">
-                🎯 {activeGoals.filter(g => g.category === 'Learning' && !g.completed).length} pending Learning Quest
+            {activeGoals.filter(g => g.category === 'Learning' && !g.completed).map(goal => (
+              <div key={goal._id} className="mt-2 text-[9px] text-primary font-bold font-space flex items-center gap-1 bg-primary/10 px-2 py-1 rounded-lg border border-primary/20 w-full truncate" title={goal.title}>
+                <span className="animate-pulse shrink-0">🎯</span>
+                <span className="truncate">{goal.title} (+{goal.xpReward} XP)</span>
               </div>
-            )}
+            ))}
           </div>
           <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center relative z-10">
             <span className="text-[9px] text-white/30 font-space uppercase">Target: Growth</span>
@@ -542,11 +545,12 @@ export default function Dashboard() {
                 <p className="text-white/50 text-xs leading-relaxed line-clamp-2">No daily habits schedule loaded. Go to Habits tab!</p>
               </>
             )}
-            {activeGoals.filter(g => g.category === 'Habits' && !g.completed).length > 0 && (
-              <div className="mt-2 text-[9px] text-cyan-400 font-bold font-space flex items-center gap-1 bg-cyan-400/10 px-2 py-0.5 rounded border border-cyan-400/20 w-max">
-                🎯 {activeGoals.filter(g => g.category === 'Habits' && !g.completed).length} pending Habits Quest
+            {activeGoals.filter(g => g.category === 'Habits' && !g.completed).map(goal => (
+              <div key={goal._id} className="mt-2 text-[9px] text-cyan-400 font-bold font-space flex items-center gap-1 bg-cyan-400/10 px-2 py-1 rounded-lg border border-cyan-400/20 w-full truncate" title={goal.title}>
+                <span className="animate-pulse shrink-0">🎯</span>
+                <span className="truncate">{goal.title} (+{goal.xpReward} XP)</span>
               </div>
-            )}
+            ))}
           </div>
           <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center relative z-10">
             <span className="text-[9px] text-white/30 font-space uppercase">Target: Habits</span>
@@ -590,6 +594,12 @@ export default function Dashboard() {
                 <p className="text-white/50 text-xs leading-relaxed line-clamp-2">No study video set. Head to the YouTube tab to schedule.</p>
               </>
             )}
+            {activeGoals.filter(g => (g.category === 'YouTube' || g.category === 'General') && !g.completed).map(goal => (
+              <div key={goal._id} className="mt-2 text-[9px] text-red-400 font-bold font-space flex items-center gap-1 bg-red-500/10 px-2 py-1 rounded-lg border border-red-500/20 w-full truncate" title={goal.title}>
+                <span className="animate-pulse shrink-0">🎯</span>
+                <span className="truncate">{goal.title} (+{goal.xpReward} XP)</span>
+              </div>
+            ))}
           </div>
           <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center relative z-10">
             <span className="text-[9px] text-white/30 font-space uppercase">Target: Study</span>

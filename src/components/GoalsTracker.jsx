@@ -250,12 +250,12 @@ export default function GoalsTracker() {
                     key={goal._id}
                     className="flex items-center justify-between p-3 rounded-xl border border-emerald-500/10 bg-[#121A2C]/20 opacity-80"
                   >
-                    <div className="flex items-center gap-3 truncate mr-2">
+                    <div className="flex items-center gap-3 mr-2 min-w-0 flex-1">
                       <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30 text-[10px] font-bold shrink-0">
                         ✓
                       </span>
-                      <div className="truncate">
-                        <p className="text-xs font-semibold text-white/50 line-through truncate">{goal.title}</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-semibold text-white/50 line-through break-words">{goal.title}</p>
                         <div className="flex items-center gap-2 mt-1 flex-wrap">
                           <span className={`text-[8px] font-space font-bold px-1.5 py-0.5 rounded border uppercase ${colorClass}`}>
                             {goal.category}

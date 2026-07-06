@@ -197,9 +197,9 @@ export default function Dashboard() {
               {activeGoals.length > 0 ? (
                 <div className="flex flex-col gap-2.5 max-h-[140px] overflow-y-auto pr-1 custom-scrollbar">
                   {activeGoals.map(goal => (
-                    <div key={goal._id} className="flex items-center gap-2.5 text-xs truncate">
-                      <span className={`w-2 h-2 rounded-full shrink-0 ${goal.completed ? 'bg-emerald-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]' : 'bg-primary animate-pulse shadow-[0_0_8px_rgba(255,213,74,0.4)]'}`} />
-                      <span className={`truncate font-medium ${goal.completed ? 'line-through text-white/30' : 'text-white/80'}`}>{goal.title}</span>
+                    <div key={goal._id} className="flex items-start gap-2.5 text-xs">
+                      <span className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${goal.completed ? 'bg-emerald-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]' : 'bg-primary animate-pulse shadow-[0_0_8px_rgba(255,213,74,0.4)]'}`} />
+                      <span className={`font-medium break-words flex-1 pr-1 ${goal.completed ? 'line-through text-white/30' : 'text-white/80'}`}>{goal.title}</span>
                       <span className="text-[9px] text-primary/80 shrink-0 ml-auto font-space font-bold bg-primary/5 px-1.5 py-0.5 rounded border border-primary/10">+{goal.xpReward} XP</span>
                     </div>
                   ))}
@@ -432,9 +432,9 @@ export default function Dashboard() {
             <h4 className="font-space text-lg font-extrabold mb-1 text-white truncate">{todayWorkout?.muscle || 'Rest Day'}</h4>
             <p className="text-white/50 text-xs line-clamp-2 leading-relaxed">{todayWorkout?.name || 'Recovery routines and light stretching'}</p>
             {activeGoals.filter(g => g.category === 'Fitness' && !g.completed).map(goal => (
-              <div key={goal._id} className="mt-2 text-[9px] text-accent font-bold font-space flex items-center gap-1 bg-accent/10 px-2 py-1 rounded-lg border border-accent/20 w-full truncate" title={goal.title}>
-                <span className="animate-pulse shrink-0">🎯</span>
-                <span className="truncate">{goal.title} (+{goal.xpReward} XP)</span>
+              <div key={goal._id} className="mt-2 text-[9px] text-accent font-bold font-space flex items-start gap-1 bg-accent/10 px-2 py-1.5 rounded-lg border border-accent/20 w-full" title={goal.title}>
+                <span className="animate-pulse shrink-0 mt-0.5">🎯</span>
+                <span className="break-words leading-tight">{goal.title} (+{goal.xpReward} XP)</span>
               </div>
             ))}
           </div>
@@ -480,9 +480,9 @@ export default function Dashboard() {
               </>
             )}
             {activeGoals.filter(g => g.category === 'Play' && !g.completed).map(goal => (
-              <div key={goal._id} className="mt-2 text-[9px] text-success font-bold font-space flex items-center gap-1 bg-success/10 px-2 py-1 rounded-lg border border-success/20 w-full truncate" title={goal.title}>
-                <span className="animate-pulse shrink-0">🎯</span>
-                <span className="truncate">{goal.title} (+{goal.xpReward} XP)</span>
+              <div key={goal._id} className="mt-2 text-[9px] text-success font-bold font-space flex items-start gap-1 bg-success/10 px-2 py-1.5 rounded-lg border border-success/20 w-full" title={goal.title}>
+                <span className="animate-pulse shrink-0 mt-0.5">🎯</span>
+                <span className="break-words leading-tight">{goal.title} (+{goal.xpReward} XP)</span>
               </div>
             ))}
           </div>
@@ -532,9 +532,9 @@ export default function Dashboard() {
               </>
             )}
             {activeGoals.filter(g => g.category === 'Learning' && !g.completed).map(goal => (
-              <div key={goal._id} className="mt-2 text-[9px] text-primary font-bold font-space flex items-center gap-1 bg-primary/10 px-2 py-1 rounded-lg border border-primary/20 w-full truncate" title={goal.title}>
-                <span className="animate-pulse shrink-0">🎯</span>
-                <span className="truncate">{goal.title} (+{goal.xpReward} XP)</span>
+              <div key={goal._id} className="mt-2 text-[9px] text-primary font-bold font-space flex items-start gap-1 bg-primary/10 px-2 py-1.5 rounded-lg border border-primary/20 w-full" title={goal.title}>
+                <span className="animate-pulse shrink-0 mt-0.5">🎯</span>
+                <span className="break-words leading-tight">{goal.title} (+{goal.xpReward} XP)</span>
               </div>
             ))}
           </div>
@@ -581,9 +581,9 @@ export default function Dashboard() {
               </>
             )}
             {activeGoals.filter(g => g.category === 'Habits' && !g.completed).map(goal => (
-              <div key={goal._id} className="mt-2 text-[9px] text-cyan-400 font-bold font-space flex items-center gap-1 bg-cyan-400/10 px-2 py-1 rounded-lg border border-cyan-400/20 w-full truncate" title={goal.title}>
-                <span className="animate-pulse shrink-0">🎯</span>
-                <span className="truncate">{goal.title} (+{goal.xpReward} XP)</span>
+              <div key={goal._id} className="mt-2 text-[9px] text-cyan-400 font-bold font-space flex items-start gap-1 bg-cyan-400/10 px-2 py-1.5 rounded-lg border border-cyan-400/20 w-full" title={goal.title}>
+                <span className="animate-pulse shrink-0 mt-0.5">🎯</span>
+                <span className="break-words leading-tight">{goal.title} (+{goal.xpReward} XP)</span>
               </div>
             ))}
           </div>
@@ -630,9 +630,9 @@ export default function Dashboard() {
               </>
             )}
             {activeGoals.filter(g => (g.category === 'YouTube' || g.category === 'General') && !g.completed).map(goal => (
-              <div key={goal._id} className="mt-2 text-[9px] text-red-400 font-bold font-space flex items-center gap-1 bg-red-500/10 px-2 py-1 rounded-lg border border-red-500/20 w-full truncate" title={goal.title}>
-                <span className="animate-pulse shrink-0">🎯</span>
-                <span className="truncate">{goal.title} (+{goal.xpReward} XP)</span>
+              <div key={goal._id} className="mt-2 text-[9px] text-red-400 font-bold font-space flex items-start gap-1 bg-red-500/10 px-2 py-1.5 rounded-lg border border-red-500/20 w-full" title={goal.title}>
+                <span className="animate-pulse shrink-0 mt-0.5">🎯</span>
+                <span className="break-words leading-tight">{goal.title} (+{goal.xpReward} XP)</span>
               </div>
             ))}
           </div>

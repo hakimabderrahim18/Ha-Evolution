@@ -20,6 +20,7 @@ import HabitsPlanner from './pages/HabitsPlanner';
 import HistoryPlanner from './pages/HistoryPlanner';
 import DailyRituals from './pages/DailyRituals';
 import YoutubePlanner from './pages/YoutubePlanner';
+import GoalsPlanner from './pages/GoalsPlanner';
 
 import './App.css';
 
@@ -76,6 +77,7 @@ function AppContent() {
             <Route path="/history" element={<HistoryPlanner />} />
             <Route path="/rituals" element={<DailyRituals />} />
             <Route path="/youtube" element={<YoutubePlanner />} />
+            <Route path="/goals" element={<GoalsPlanner />} />
           </Routes>
         </AnimatePresence>
       </main>

@@ -355,14 +355,22 @@ export const AppProvider = ({ children }) => {
             return updated;
           });
 
-          // Clear completed weekly goals on Saturday
-          const completedGoals = goalsList.filter(g => g.completed);
-          Promise.all(completedGoals.map(g => fetch(`${API_BASE}/api/goals/${g._id}`, { method: 'DELETE' })))
-            .then(() => {
-              setGoalsList(prev => prev.filter(g => !g.completed));
-              console.log("Cleared completed weekly goals on Saturday reset.");
+          // Archive completed weekly goals on Saturday
+          const completedGoals = goalsList.filter(g => g.completed && !g.archived);
+          Promise.all(completedGoals.map(g => fetch(`${API_BASE}/api/goals/${g._id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...g, archived: true, completedAt: new Date() })
+          })))
+            .then(async () => {
+              const res = await fetch(`${API_BASE}/api/goals`);
+              if (res.ok) {
+                const freshGoals = await res.json();
+                setGoalsList(freshGoals);
+              }
+              console.log("Archived completed weekly goals on Saturday reset.");
             })
-            .catch(err => console.error("Failed to clear completed weekly goals:", err));
+            .catch(err => console.error("Failed to archive completed weekly goals:", err));
 
           // Sync resets with backend
           const resetDAYS = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
@@ -1000,11 +1008,19 @@ export const AppProvider = ({ children }) => {
     setHabitsSchedule(DEFAULT_HABITS_SCHEDULE);
     setYoutubeSchedule(DEFAULT_YOUTUBE_SCHEDULE);
     
-    // Clear completed weekly goals
-    const manualCompletedGoals = goalsList.filter(g => g.completed);
-    Promise.all(manualCompletedGoals.map(g => fetch(`${API_BASE}/api/goals/${g._id}`, { method: 'DELETE' })))
-      .then(() => {
-        setGoalsList(prev => prev.filter(g => !g.completed));
+    // Archive completed weekly goals
+    const manualCompletedGoals = goalsList.filter(g => g.completed && !g.archived);
+    Promise.all(manualCompletedGoals.map(g => fetch(`${API_BASE}/api/goals/${g._id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...g, archived: true, completedAt: new Date() })
+    })))
+      .then(async () => {
+        const res = await fetch(`${API_BASE}/api/goals`);
+        if (res.ok) {
+          const freshGoals = await res.json();
+          setGoalsList(freshGoals);
+        }
       })
       .catch(err => console.error(err));
 

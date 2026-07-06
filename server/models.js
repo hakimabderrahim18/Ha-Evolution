@@ -108,7 +108,9 @@ const GoalSchema = new mongoose.Schema({
   title: { type: String, required: true },
   category: { type: String, default: 'General' },
   xpReward: { type: Number, default: 150 },
-  completed: { type: Boolean, default: false }
+  completed: { type: Boolean, default: false },
+  archived: { type: Boolean, default: false },
+  completedAt: { type: Date }
 });
 
 export const SportWorkout = mongoose.model('SportWorkout', SportWorkoutSchema);

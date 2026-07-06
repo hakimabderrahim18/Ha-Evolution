@@ -6,7 +6,7 @@ import GlassCard from '../components/GlassCard';
 import PrayersMatrix from '../components/PrayersMatrix';
 import HygieneTracker from '../components/HygieneTracker';
 import GoalsTracker from '../components/GoalsTracker';
-import { FiActivity, FiPlayCircle, FiBookOpen, FiCompass, FiYoutube } from 'react-icons/fi';
+import { FiActivity, FiPlayCircle, FiBookOpen, FiCompass, FiYoutube, FiFlag } from 'react-icons/fi';
 import confetti from 'canvas-confetti';
 
 const QUOTES = [
@@ -29,6 +29,7 @@ export default function Dashboard() {
     toggleHabitCompleted,
     youtubeSchedule,
     toggleYoutubeCompleted,
+    goalsList,
     userStats,
     addXP,
     loading
@@ -80,6 +81,7 @@ export default function Dashboard() {
   const learnPercent = Math.round((completedLearnCount / totalTasks) * 100);
   const habitsPercent = Math.round((completedHabitsCount / totalTasks) * 100);
   const youtubePercent = Math.round((completedYoutubeCount / totalTasks) * 100);
+  const activeGoals = (goalsList || []).filter(g => !g.archived);
 
   const handleCompleteConfetti = (type, day) => {
     // Trigger confetti
@@ -138,6 +140,16 @@ export default function Dashboard() {
             <div className="font-space">
               <span className="text-[10px] text-white/40 block leading-none uppercase">Evolution Level</span>
               <span className="text-lg font-bold text-accent">Rank {userStats.level}</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 glass px-4 py-2 rounded-2xl border-white/5 shadow-lg">
+            <FiFlag className="w-5 h-5 text-success" />
+            <div className="font-space">
+              <span className="text-[10px] text-white/40 block leading-none uppercase">Weekly Goals</span>
+              <span className="text-lg font-bold text-white">
+                {(goalsList || []).filter(g => g.completed && !g.archived).length}/{(goalsList || []).filter(g => !g.archived).length} Done
+              </span>
             </div>
           </div>
         </div>
@@ -384,6 +396,11 @@ export default function Dashboard() {
             </div>
             <h4 className="font-space text-lg font-extrabold mb-1 text-white truncate">{todayWorkout?.muscle || 'Rest Day'}</h4>
             <p className="text-white/50 text-xs line-clamp-2 leading-relaxed">{todayWorkout?.name || 'Recovery routines and light stretching'}</p>
+            {activeGoals.filter(g => g.category === 'Fitness' && !g.completed).length > 0 && (
+              <div className="mt-2 text-[9px] text-accent font-bold font-space flex items-center gap-1 bg-accent/10 px-2 py-0.5 rounded border border-accent/20 w-max">
+                🎯 {activeGoals.filter(g => g.category === 'Fitness' && !g.completed).length} pending Fitness Quest
+              </div>
+            )}
           </div>
           <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center relative z-10">
             <span className="text-[9px] text-white/30 font-space uppercase">Target: Workout</span>
@@ -425,6 +442,11 @@ export default function Dashboard() {
                 <h4 className="font-space text-lg font-extrabold mb-1 text-white">Unscheduled</h4>
                 <p className="text-white/50 text-xs leading-relaxed line-clamp-2">No gaming/movie session set. Go to Play to add one!</p>
               </>
+            )}
+            {activeGoals.filter(g => g.category === 'Play' && !g.completed).length > 0 && (
+              <div className="mt-2 text-[9px] text-success font-bold font-space flex items-center gap-1 bg-success/10 px-2 py-0.5 rounded border border-success/20 w-max">
+                🎯 {activeGoals.filter(g => g.category === 'Play' && !g.completed).length} pending Play Quest
+              </div>
             )}
           </div>
           <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center relative z-10">
@@ -472,6 +494,11 @@ export default function Dashboard() {
                 <p className="text-white/50 text-xs leading-relaxed line-clamp-2">No learning routine set. Open the Learn tab to schedule.</p>
               </>
             )}
+            {activeGoals.filter(g => g.category === 'Learning' && !g.completed).length > 0 && (
+              <div className="mt-2 text-[9px] text-primary font-bold font-space flex items-center gap-1 bg-primary/10 px-2 py-0.5 rounded border border-primary/20 w-max">
+                🎯 {activeGoals.filter(g => g.category === 'Learning' && !g.completed).length} pending Learning Quest
+              </div>
+            )}
           </div>
           <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center relative z-10">
             <span className="text-[9px] text-white/30 font-space uppercase">Target: Growth</span>
@@ -514,6 +541,11 @@ export default function Dashboard() {
                 <h4 className="font-space text-lg font-extrabold mb-1 text-white">Unscheduled</h4>
                 <p className="text-white/50 text-xs leading-relaxed line-clamp-2">No daily habits schedule loaded. Go to Habits tab!</p>
               </>
+            )}
+            {activeGoals.filter(g => g.category === 'Habits' && !g.completed).length > 0 && (
+              <div className="mt-2 text-[9px] text-cyan-400 font-bold font-space flex items-center gap-1 bg-cyan-400/10 px-2 py-0.5 rounded border border-cyan-400/20 w-max">
+                🎯 {activeGoals.filter(g => g.category === 'Habits' && !g.completed).length} pending Habits Quest
+              </div>
             )}
           </div>
           <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center relative z-10">

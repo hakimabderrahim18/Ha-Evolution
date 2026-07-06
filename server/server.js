@@ -481,10 +481,16 @@ app.post('/api/goals', async (req, res) => {
 
 app.put('/api/goals/:id', async (req, res) => {
   try {
-    const { title, category, xpReward, completed } = req.body;
+    const { title, category, xpReward, completed, archived, completedAt } = req.body;
+    let finalCompletedAt = completedAt;
+    if (completed && !completedAt) {
+      finalCompletedAt = new Date();
+    } else if (!completed) {
+      finalCompletedAt = null;
+    }
     const updated = await Goal.findByIdAndUpdate(
       req.params.id,
-      { $set: { title, category, xpReward, completed } },
+      { $set: { title, category, xpReward, completed, archived, completedAt: finalCompletedAt } },
       { new: true }
     );
     res.json(updated);

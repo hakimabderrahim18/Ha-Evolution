@@ -5,6 +5,7 @@ import { AppContext } from '../context/AppContext';
 import GlassCard from '../components/GlassCard';
 import PrayersMatrix from '../components/PrayersMatrix';
 import HygieneTracker from '../components/HygieneTracker';
+import GoalsTracker from '../components/GoalsTracker';
 import { FiActivity, FiPlayCircle, FiBookOpen, FiCompass, FiYoutube } from 'react-icons/fi';
 import confetti from 'canvas-confetti';
 

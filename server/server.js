@@ -11,7 +11,8 @@ import {
   UserStats,
   QuranHabit,
   DailyHistory,
-  YoutubeSchedule
+  YoutubeSchedule,
+  Goal
 } from './models.js';
 
 dotenv.config();
@@ -155,6 +156,20 @@ async function seedDatabase() {
           channel: DEFAULT_YOUTUBE[day].channel,
           completed: false
         });
+      }
+    }
+
+    // 7. Seed Goals
+    const goalCount = await Goal.countDocuments();
+    if (goalCount === 0) {
+      console.log('Seeding default weekly goals...');
+      const defaultGoals = [
+        { title: 'Complete all 6 fitness training sessions', category: 'Fitness', xpReward: 200, completed: false },
+        { title: 'Log 3 hours of focused learning', category: 'Learning', xpReward: 150, completed: false },
+        { title: 'Complete daily prayers 5 days in a row', category: 'Habits', xpReward: 150, completed: false }
+      ];
+      for (const g of defaultGoals) {
+        await Goal.create(g);
       }
     }
     
@@ -434,6 +449,54 @@ app.post('/api/history/:date', async (req, res) => {
       { new: true, upsert: true }
     );
     res.json(record);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 9. Weekly Goals Routes
+app.get('/api/goals', async (req, res) => {
+  try {
+    const goals = await Goal.find({});
+    res.json(goals);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/goals', async (req, res) => {
+  try {
+    const { title, category, xpReward, completed } = req.body;
+    const newGoal = await Goal.create({
+      title,
+      category: category || 'General',
+      xpReward: Number(xpReward) || 150,
+      completed: completed || false
+    });
+    res.json(newGoal);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/goals/:id', async (req, res) => {
+  try {
+    const { title, category, xpReward, completed } = req.body;
+    const updated = await Goal.findByIdAndUpdate(
+      req.params.id,
+      { $set: { title, category, xpReward, completed } },
+      { new: true }
+    );
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/goals/:id', async (req, res) => {
+  try {
+    await Goal.findByIdAndDelete(req.params.id);
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -73,6 +73,7 @@ export const AppProvider = ({ children }) => {
   const [userStats, setUserStats] = useState(DEFAULT_USER_STATS);
   const [todayHistory, setTodayHistory] = useState(null);
   const [youtubeSchedule, setYoutubeSchedule] = useState(DEFAULT_YOUTUBE_SCHEDULE);
+  const [goalsList, setGoalsList] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [levelUpData, setLevelUpData] = useState(null);
@@ -108,6 +109,7 @@ export const AppProvider = ({ children }) => {
           fetchResource(API_BASE + '/api/watchlist', setWatchlist, 'watchlist'),
           fetchResource(API_BASE + '/api/learning', setLearningSchedule, 'learning'),
           fetchResource(API_BASE + '/api/stats', setUserStats, 'stats'),
+          fetchResource(API_BASE + '/api/goals', setGoalsList, 'goals'),
           fetchResource(API_BASE + '/api/youtube', setYoutubeSchedule, 'youtube'),
           fetchResource(API_BASE + '/api/habits', setHabitsSchedule, 'habits'),
           fetchResource(API_BASE + '/api/history/' + getLocalDateString(), setTodayHistory, 'todayHistory')
@@ -352,6 +354,15 @@ export const AppProvider = ({ children }) => {
             });
             return updated;
           });
+
+          // Clear completed weekly goals on Saturday
+          const completedGoals = goalsList.filter(g => g.completed);
+          Promise.all(completedGoals.map(g => fetch(`${API_BASE}/api/goals/${g._id}`, { method: 'DELETE' })))
+            .then(() => {
+              setGoalsList(prev => prev.filter(g => !g.completed));
+              console.log("Cleared completed weekly goals on Saturday reset.");
+            })
+            .catch(err => console.error("Failed to clear completed weekly goals:", err));
 
           // Sync resets with backend
           const resetDAYS = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
@@ -880,6 +891,54 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  const addGoal = async (title, category, xpReward) => {
+    const payload = { title, category, xpReward: Number(xpReward) || 150, completed: false };
+    try {
+      const res = await fetch(`${API_BASE}/api/goals`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        const newGoal = await res.json();
+        setGoalsList(prev => [...prev, newGoal]);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const toggleGoalCompleted = async (id) => {
+    const goal = goalsList.find(g => g._id === id);
+    if (!goal) return;
+    const nextCompleted = !goal.completed;
+    if (nextCompleted) {
+      setTimeout(() => addXP(goal.xpReward || 150), 50);
+    }
+    const updatedGoal = { ...goal, completed: nextCompleted };
+    setGoalsList(prev => prev.map(g => g._id === id ? updatedGoal : g));
+    try {
+      await fetch(`${API_BASE}/api/goals/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedGoal)
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const removeGoal = async (id) => {
+    setGoalsList(prev => prev.filter(g => g._id !== id));
+    try {
+      await fetch(`${API_BASE}/api/goals/${id}`, {
+        method: 'DELETE'
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const updateHabitsWorkout = async (day, surah, onePlusActivity) => {
     const updatedHabit = { surah, onePlusActivity, completed: habitsSchedule[day]?.completed || false };
     setHabitsSchedule(prev => ({
@@ -940,6 +999,15 @@ export const AppProvider = ({ children }) => {
     setLearningSchedule(DEFAULT_LEARNING_SCHEDULE);
     setHabitsSchedule(DEFAULT_HABITS_SCHEDULE);
     setYoutubeSchedule(DEFAULT_YOUTUBE_SCHEDULE);
+    
+    // Clear completed weekly goals
+    const manualCompletedGoals = goalsList.filter(g => g.completed);
+    Promise.all(manualCompletedGoals.map(g => fetch(`${API_BASE}/api/goals/${g._id}`, { method: 'DELETE' })))
+      .then(() => {
+        setGoalsList(prev => prev.filter(g => !g.completed));
+      })
+      .catch(err => console.error(err));
+
     setUserStats(prev => ({
       ...prev,
       streak: prev.streak + 1
@@ -1012,6 +1080,10 @@ export const AppProvider = ({ children }) => {
       youtubeSchedule,
       updateYoutubeSchedule,
       toggleYoutubeCompleted,
+      goalsList,
+      addGoal,
+      toggleGoalCompleted,
+      removeGoal,
       loading
     }}>
       {children}

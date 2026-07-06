@@ -104,6 +104,13 @@ const YoutubeScheduleSchema = new mongoose.Schema({
   completed: { type: Boolean, default: false }
 });
 
+const GoalSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  category: { type: String, default: 'General' },
+  xpReward: { type: Number, default: 150 },
+  completed: { type: Boolean, default: false }
+});
+
 export const SportWorkout = mongoose.model('SportWorkout', SportWorkoutSchema);
 export const EntertainmentDay = mongoose.model('EntertainmentDay', EntertainmentDaySchema);
 export const WatchlistItem = mongoose.model('WatchlistItem', WatchlistItemSchema);
@@ -112,3 +119,4 @@ export const UserStats = mongoose.model('UserStats', UserStatsSchema);
 export const QuranHabit = mongoose.model('QuranHabit', QuranHabitSchema);
 export const DailyHistory = mongoose.model('DailyHistory', DailyHistorySchema);
 export const YoutubeSchedule = mongoose.model('YoutubeSchedule', YoutubeScheduleSchema);
+export const Goal = mongoose.model('Goal', GoalSchema);

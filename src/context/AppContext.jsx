@@ -223,24 +223,6 @@ export const AppProvider = ({ children }) => {
       const todayDateStr = getLocalDateString();
       const lastActive = userStats.lastActiveDate;
 
-      // Ensure today's history record exists
-      try {
-        const histCheck = await fetch(`${API_BASE}/api/history/${todayDateStr}`);
-        let recordExists = false;
-        if (histCheck.ok) {
-          const record = await histCheck.json();
-          if (record) {
-            setTodayHistory(record);
-            recordExists = true;
-          }
-        }
-        if (!recordExists) {
-          await initializeTodayHistory(todayDateStr);
-        }
-      } catch (err) {
-        console.error("Failed to load/initialize today's history:", err);
-      }
-
       if (lastActive && lastActive !== todayDateStr) {
         console.log(`Detecting new day transition from ${lastActive} to ${todayDateStr}`);
 

@@ -30,6 +30,7 @@ export default function Dashboard() {
     youtubeSchedule,
     toggleYoutubeCompleted,
     goalsList,
+    manuallyResetWeeklyCompletions,
     userStats,
     addXP,
     loading
@@ -126,7 +127,18 @@ export default function Dashboard() {
         </div>
 
         {/* Streak & XP Summary Card */}
-        <div className="flex gap-4 items-center">
+        <div className="flex gap-4 items-center flex-wrap">
+          <button
+            onClick={() => {
+              if (window.confirm("Are you sure you want to reset all completion statuses for this week? (Your custom activities and goals will not be changed; completed goals will be archived)")) {
+                manuallyResetWeeklyCompletions();
+              }
+            }}
+            className="px-4 py-2.5 rounded-2xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 font-space font-bold text-xs transition-all cursor-pointer shadow-lg hover:shadow-[0_0_15px_rgba(239,68,68,0.15)] uppercase whitespace-nowrap"
+          >
+            Reset Week Status
+          </button>
+
           <div className="flex items-center gap-2 glass px-4 py-2 rounded-2xl border-white/5 shadow-lg">
             <FiZap className="w-5 h-5 text-primary fill-primary animate-pulse" />
             <div className="font-space">

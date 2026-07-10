@@ -982,6 +982,131 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  const manuallyResetWeeklyCompletions = async () => {
+    // 1. Reset locally
+    setSportSchedule(prev => {
+      const updated = {};
+      Object.keys(prev).forEach(d => {
+        updated[d] = { ...prev[d], completed: false };
+      });
+      return updated;
+    });
+
+    setEntertainmentSchedule(prev => {
+      const updated = {};
+      Object.keys(prev).forEach(d => {
+        updated[d] = prev[d] ? { ...prev[d], completed: false } : null;
+      });
+      return updated;
+    });
+
+    setLearningSchedule(prev => {
+      const updated = {};
+      Object.keys(prev).forEach(d => {
+        updated[d] = prev[d] ? { ...prev[d], completed: false } : null;
+      });
+      return updated;
+    });
+
+    setHabitsSchedule(prev => {
+      const updated = {};
+      Object.keys(prev).forEach(d => {
+        updated[d] = prev[d] ? { ...prev[d], completed: false } : null;
+      });
+      return updated;
+    });
+
+    setYoutubeSchedule(prev => {
+      const updated = {};
+      Object.keys(prev).forEach(d => {
+        updated[d] = prev[d] ? { ...prev[d], completed: false } : null;
+      });
+      return updated;
+    });
+
+    // Archive completed weekly goals
+    const manualCompletedGoals = goalsList.filter(g => g.completed && !g.archived);
+    try {
+      await Promise.all(manualCompletedGoals.map(g => fetch(`${API_BASE}/api/goals/${g._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...g, archived: true, completedAt: new Date() })
+      })));
+      const res = await fetch(`${API_BASE}/api/goals`);
+      if (res.ok) {
+        const freshGoals = await res.json();
+        setGoalsList(freshGoals);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+
+    // 2. Sync resets with backend database
+    const resetDAYS = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+    try {
+      await Promise.all([
+        ...resetDAYS.map(day => {
+          const sport = sportSchedule[day];
+          if (sport) {
+            return fetch(`${API_BASE}/api/sport/${day}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ...sport, completed: false })
+            });
+          }
+          return Promise.resolve();
+        }),
+        ...resetDAYS.map(day => {
+          const ent = entertainmentSchedule[day];
+          if (ent) {
+            return fetch(`${API_BASE}/api/entertainment/${day}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ...ent, completed: false })
+            });
+          }
+          return Promise.resolve();
+        }),
+        ...resetDAYS.map(day => {
+          const learn = learningSchedule[day];
+          if (learn) {
+            return fetch(`${API_BASE}/api/learning/${day}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ...learn, completed: false })
+            });
+          }
+          return Promise.resolve();
+        }),
+        ...resetDAYS.map(day => {
+          const habit = habitsSchedule[day];
+          if (habit) {
+            return fetch(`${API_BASE}/api/habits/${day}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ...habit, completed: false })
+            });
+          }
+          return Promise.resolve();
+        }),
+        ...resetDAYS.map(day => {
+          const ytItem = youtubeSchedule[day];
+          if (ytItem) {
+            return fetch(`${API_BASE}/api/youtube/${day}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ...ytItem, completed: false })
+            });
+          }
+          return Promise.resolve();
+        })
+      ]);
+      console.log("Manual weekly completions reset sync complete.");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const resetWeeklyData = async () => {
     const DAYS = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
     setSportSchedule(DEFAULT_SPORT_SCHEDULE);
@@ -1082,6 +1207,7 @@ export const AppProvider = ({ children }) => {
       addGoal,
       toggleGoalCompleted,
       removeGoal,
+      manuallyResetWeeklyCompletions,
       loading
     }}>
       {children}

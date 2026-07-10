@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiTrendingUp, FiActivity, FiTv, FiBookOpen, FiAward, FiCheckCircle } from 'react-icons/fi';
 import { AppContext, ACHIEVEMENTS } from '../context/AppContext';
@@ -6,6 +6,25 @@ import GlassCard from '../components/GlassCard';
 
 export default function EvolutionAnalytics() {
   const { sportSchedule, entertainmentSchedule, learningSchedule, habitsSchedule, userStats, loading } = useContext(AppContext);
+  const [selectedWeek, setSelectedWeek] = useState('current');
+  const [historyList, setHistoryList] = useState([]);
+
+  const API_BASE = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? '' : 'https://ha-evolution.onrender.com');
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/history`);
+        if (res.ok) {
+          const data = await res.json();
+          setHistoryList(data || []);
+        }
+      } catch (err) {
+        console.warn("Failed to fetch history:", err);
+      }
+    };
+    fetchHistory();
+  }, []);
 
   if (loading) {
     return (
@@ -16,36 +35,103 @@ export default function EvolutionAnalytics() {
     );
   }
 
-  // Math metrics
-  const completedWorkouts = Object.values(sportSchedule).filter(w => w.completed).length;
-  const completedPlay = Object.values(entertainmentSchedule).filter(p => p && p.completed).length;
-  const completedLearn = Object.values(learningSchedule).filter(l => l && l.completed).length;
-  const completedHabits = Object.values(habitsSchedule || {}).filter(h => h && h.completed).length;
+  // Week helper formulas
+  const getWeekStartDate = (dateStr) => {
+    const d = new Date(dateStr);
+    const day = d.getDay();
+    const diff = (day - 6 + 7) % 7;
+    d.setDate(d.getDate() - diff);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  };
 
-  const totalCompleted = completedWorkouts + completedPlay + completedLearn + completedHabits;
-
-  // Consistency Score formula: (completed / total planned) * 100
-  const totalPlanned = 7 + Object.values(entertainmentSchedule).filter(Boolean).length + 
-    Object.values(learningSchedule).filter(Boolean).length + Object.values(habitsSchedule || {}).filter(Boolean).length;
-  const consistencyScore = totalPlanned > 0 ? Math.round((totalCompleted / totalPlanned) * 100) : 0;
-
-  // Chart data: daily completions count mapping
-  const days = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-  const dailyCompletions = days.map((day) => {
-    let count = 0;
-    if (sportSchedule[day]?.completed) count++;
-    if (entertainmentSchedule[day]?.completed) count++;
-    if (learningSchedule[day]?.completed) count++;
-    if (habitsSchedule?.[day]?.completed) count++;
-    return count; // returns 0, 1, 2, 3, or 4
+  // Group history by week
+  const weeksMap = {};
+  historyList.forEach(record => {
+    if (!record.date) return;
+    const weekStart = getWeekStartDate(record.date);
+    if (!weeksMap[weekStart]) {
+      weeksMap[weekStart] = [];
+    }
+    weeksMap[weekStart].push(record);
   });
 
+  const uniqueWeekStarts = Object.keys(weeksMap).sort((a, b) => new Date(b) - new Date(a));
+
+  // Compute metrics based on selectedWeek
+  let completedWorkouts = 0;
+  let completedPlay = 0;
+  let completedLearn = 0;
+  let completedHabits = 0;
+  let completedYoutube = 0;
+  let totalCompleted = 0;
+  let totalPlanned = 0;
+  let dailyCompletions = [];
+  const days = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+
+  if (selectedWeek === 'current') {
+    completedWorkouts = Object.values(sportSchedule).filter(w => w.completed).length;
+    completedPlay = Object.values(entertainmentSchedule).filter(p => p && p.completed).length;
+    completedLearn = Object.values(learningSchedule).filter(l => l && l.completed).length;
+    completedHabits = Object.values(habitsSchedule || {}).filter(h => h && h.completed).length;
+
+    totalCompleted = completedWorkouts + completedPlay + completedLearn + completedHabits;
+    totalPlanned = 7 + Object.values(entertainmentSchedule).filter(Boolean).length + 
+      Object.values(learningSchedule).filter(Boolean).length + Object.values(habitsSchedule || {}).filter(Boolean).length;
+
+    dailyCompletions = days.map((day) => {
+      let count = 0;
+      if (sportSchedule[day]?.completed) count++;
+      if (entertainmentSchedule[day]?.completed) count++;
+      if (learningSchedule[day]?.completed) count++;
+      if (habitsSchedule?.[day]?.completed) count++;
+      return count;
+    });
+  } else {
+    const weekRecords = weeksMap[selectedWeek] || [];
+    weekRecords.forEach(r => {
+      if (r.sport && r.sport.muscle) {
+        totalPlanned++;
+        if (r.sport.completed) { completedWorkouts++; totalCompleted++; }
+      }
+      if (r.entertainment && r.entertainment.title) {
+        totalPlanned++;
+        if (r.entertainment.completed) { completedPlay++; totalCompleted++; }
+      }
+      if (r.learning && r.learning.subject) {
+        totalPlanned++;
+        if (r.learning.completed) { completedLearn++; totalCompleted++; }
+      }
+      if (r.habits && (r.habits.surah || r.habits.onePlusActivity)) {
+        totalPlanned++;
+        if (r.habits.completed) { completedHabits++; totalCompleted++; }
+      }
+      if (r.youtube && r.youtube.title) {
+        totalPlanned++;
+        if (r.youtube.completed) { completedYoutube++; totalCompleted++; }
+      }
+    });
+
+    dailyCompletions = days.map((dayName) => {
+      const record = weekRecords.find(r => r.dayName === dayName);
+      if (!record) return 0;
+      let count = 0;
+      if (record.sport?.completed) count++;
+      if (record.entertainment?.completed) count++;
+      if (record.learning?.completed) count++;
+      if (record.habits?.completed) count++;
+      if (record.youtube?.completed) count++;
+      return count;
+    });
+  }
+
+  const consistencyScore = totalPlanned > 0 ? Math.round((totalCompleted / totalPlanned) * 100) : 0;
+
   // Calculate coordinates for SVG area chart (width 500, height 150)
-  // X steps: Monday = 20, Sunday = 480
-  // Y coordinates: 0 completions = 130, 4 completions = 20
+  // X steps: Saturday = 20, Friday = 480
+  // Y coordinates: 0 completions = 130, 5 completions = 20
   const points = dailyCompletions.map((count, index) => {
     const x = 20 + (index * (460 / 6));
-    const y = 130 - (count * (110 / 4));
+    const y = 130 - (count * (110 / 5)); // out of 5 maximum completions per day
     return { x, y };
   });
 
@@ -66,13 +152,36 @@ export default function EvolutionAnalytics() {
       transition={{ duration: 0.5 }}
       className="pb-32 pt-6 max-w-6xl mx-auto px-4 md:px-8 font-poppins"
     >
-      <div className="mb-8">
-        <h2 className="font-space text-3xl md:text-5xl font-extrabold tracking-tight">
-          EVOLUTION <span className="bg-gradient-to-r from-accent via-primary to-emerald-400 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(124,77,255,0.2)]">ANALYTICS</span>
-        </h2>
-        <p className="text-white/40 text-xs md:text-sm tracking-wider uppercase font-space mt-1">
-          Historical breakdown of neural focus, physical training, and entertainment consistency.
-        </p>
+      <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+          <h2 className="font-space text-3xl md:text-5xl font-extrabold tracking-tight">
+            EVOLUTION <span className="bg-gradient-to-r from-accent via-primary to-emerald-400 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(124,77,255,0.2)]">ANALYTICS</span>
+          </h2>
+          <p className="text-white/40 text-xs md:text-sm tracking-wider uppercase font-space mt-1">
+            Historical breakdown of neural focus, physical training, and entertainment consistency.
+          </p>
+        </div>
+
+        {/* Week Filter Dropdown */}
+        <div className="flex items-center gap-2 glass px-4 py-2.5 rounded-2xl border-white/5 shadow-lg select-none">
+          <span className="text-[10px] text-white/40 font-space uppercase">Week Filter:</span>
+          <select
+            value={selectedWeek}
+            onChange={(e) => setSelectedWeek(e.target.value)}
+            className="bg-transparent text-xs font-space font-bold text-white focus:outline-none border-none cursor-pointer pr-4"
+          >
+            <option value="current" className="bg-[#0B1220] text-white">Current Week</option>
+            {uniqueWeekStarts.map(ws => {
+              const date = new Date(ws);
+              const formattedDate = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+              return (
+                <option key={ws} value={ws} className="bg-[#0B1220] text-white">
+                  Week of {formattedDate}
+                </option>
+              );
+            })}
+          </select>
+        </div>
       </div>
 
       {/* Overview stats cards */}
